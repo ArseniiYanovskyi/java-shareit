@@ -29,7 +29,7 @@ public class ItemController {
                               @RequestBody ItemDto itemDto,
                               @PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to update existed Item with id {} from user id {}.", itemId, userId);
-
+        itemDto.setId(itemId);
         return itemService.updateItem(userId, itemDto);
     }
 

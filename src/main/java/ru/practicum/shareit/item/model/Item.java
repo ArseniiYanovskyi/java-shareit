@@ -14,5 +14,5 @@ public class Item {
     private String name;
     @NotNull
     private String description;
-    private boolean available;
+    private boolean isAvailable;
 }

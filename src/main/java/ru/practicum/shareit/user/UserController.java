@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -15,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final ItemService itemService;
+    //private final ItemService itemService;
     private final Logger log = LoggerFactory.getLogger("UserController");
 
     @PostMapping
@@ -54,7 +53,7 @@ public class UserController {
         userService.deleteUser(userId);
 
         /*log.debug("Sending to ItemService request to delete deleted user items.");
-
         itemService.deleteUserItems(userId);*/
+        //не хочу удалять эти строчки кода, потому что нахожу такое поведение логичным
     }
 }
