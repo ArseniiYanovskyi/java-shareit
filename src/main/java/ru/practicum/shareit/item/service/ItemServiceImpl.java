@@ -18,10 +18,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     private final ItemDao itemRepository;
     private final UserService userService;
     private final Logger log = LoggerFactory.getLogger("ItemService");
+
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
         checkItemDtoValidation(itemDto);
@@ -98,6 +99,7 @@ public class ItemServiceImpl implements ItemService{
                 .map(ItemMapper::convertToDto)
                 .collect(Collectors.toList());
     }
+
     @Override
     public void deleteUserItems(long userId) {
         //проверка наличия пользователя отсутствует потому что метод вызывается после удаления пользователя
@@ -120,7 +122,7 @@ public class ItemServiceImpl implements ItemService{
         }
     }
 
-    private boolean checkNameForUpdating(ItemDto itemDto){
+    private boolean checkNameForUpdating(ItemDto itemDto) {
         if (itemDto.getName() != null) {
             if (itemDto.getName().isBlank()) {
                 throw new ValidationException("Name is blank.");
@@ -130,7 +132,7 @@ public class ItemServiceImpl implements ItemService{
         return false;
     }
 
-    private boolean checkDescriptionForUpdating(ItemDto itemDto){
+    private boolean checkDescriptionForUpdating(ItemDto itemDto) {
         if (itemDto.getDescription() != null) {
             if (itemDto.getDescription().isBlank()) {
                 throw new ValidationException("Description is blank.");
@@ -140,9 +142,10 @@ public class ItemServiceImpl implements ItemService{
         return false;
     }
 
-    private boolean checkAvailableForUpdating(ItemDto itemDto){
+    private boolean checkAvailableForUpdating(ItemDto itemDto) {
         return itemDto.getAvailable() != null;
     }
+
     private void checkIfUserOwner(long userId, long itemId) {
         if (!itemRepository.getIdOfUsersItems(userId).contains(itemId)) {
             throw new NotFoundException("Information about this user's item absent.");
@@ -156,12 +159,15 @@ public class ItemServiceImpl implements ItemService{
     private ItemDto convertToDto(Item item) {
         return ItemMapper.convertToDto(item);
     }
+
     private String getName(ItemDto itemDto) {
         return ItemMapper.getName(itemDto);
     }
+
     private String getDescription(ItemDto itemDto) {
         return ItemMapper.getDescription(itemDto);
     }
+
     private Boolean getAvailability(ItemDto itemDto) {
         return ItemMapper.getAvailability(itemDto);
     }

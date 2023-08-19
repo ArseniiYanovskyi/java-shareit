@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserDao userRepository;
     private final String CORRECT_EMAIL_REGEXP = "\\S.*@\\S.*\\..*";
     private final Logger log = LoggerFactory.getLogger("UserService");
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService{
             userRepository.updateUserName(userId, getName(userDto));
         }
         if (checkEmailForUpdating(userDto)) {
-            if (!getUserById(userId).getEmail().equals(getEmail(userDto))){
+            if (!getUserById(userId).getEmail().equals(getEmail(userDto))) {
                 checkIsEmailAvailable(getEmail(userDto));
             }
             log.debug("Sending to DAO email to update user {} information.", userId);
@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository.")));
 
     }
+
     @Override
     public void checkIsUserPresent(long userId) {
         userRepository.getUserById(userId)

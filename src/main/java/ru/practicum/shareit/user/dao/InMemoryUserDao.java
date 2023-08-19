@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class InMemoryUserDao implements UserDao{
+public class InMemoryUserDao implements UserDao {
     private final HashMap<Long, User> users;
-    private long idCounter = 1;
     private final Logger log = LoggerFactory.getLogger("UserRepository");
+    private long idCounter = 1;
 
     @Override
     public User addUser(User user) {

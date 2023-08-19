@@ -16,6 +16,7 @@ public class ItemController {
     private final ItemService itemService;
     private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
     private final Logger log = LoggerFactory.getLogger("ItemController");
+
     @PostMapping
     public ItemDto addItem(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
                            @RequestBody ItemDto itemDto) {

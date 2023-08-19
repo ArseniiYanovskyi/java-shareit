@@ -13,10 +13,11 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class InMemoryItemDao implements ItemDao{
+public class InMemoryItemDao implements ItemDao {
     private final HashMap<Long, HashMap<Long, Item>> items;
-    private long itemIdCounter = 1;
     private final Logger log = LoggerFactory.getLogger("ItemRepository");
+    private long itemIdCounter = 1;
+
     @Override
     public Item addNewItem(Item item) {
         log.debug("Received item to add as new one.");
@@ -53,8 +54,9 @@ public class InMemoryItemDao implements ItemDao{
         log.debug("Item name with id {} updated successfully.", itemId);
         return getItemById(itemId).get();
     }
+
     @Override
-    public  Item updateItemNDescription(long userId, long itemId, String description) {
+    public Item updateItemNDescription(long userId, long itemId, String description) {
         log.debug("Received new name for item id {}.", itemId);
 
         Item item = getItemById(itemId).get();
@@ -68,6 +70,7 @@ public class InMemoryItemDao implements ItemDao{
         log.debug("Item name with id {} updated successfully.", itemId);
         return items.get(userId).get(itemId);
     }
+
     @Override
     public Item updateItemAvailability(long userId, long itemId, Boolean isAvailable) {
         log.debug("Received new name for item id {}.", itemId);
@@ -118,7 +121,7 @@ public class InMemoryItemDao implements ItemDao{
         for (Long userId : items.keySet()) {
             for (Long itemId : items.get(userId).keySet()) {
                 if (items.get(userId).get(itemId).getDescription().toUpperCase().contains(text.toUpperCase())
-                    && items.get(userId).get(itemId).isAvailable()) {
+                        && items.get(userId).get(itemId).isAvailable()) {
                     returningList.add(items.get(userId).get(itemId));
                 }
             }
