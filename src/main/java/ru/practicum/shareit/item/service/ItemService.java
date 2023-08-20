@@ -9,9 +9,7 @@ public interface ItemService {
 
     ItemDto updateItem(long userId, ItemDto itemDto);
 
-    ItemDto getItemById(long userId);
-
-    void checkIsItemPresent(long itemId);
+    ItemDto getItemDtoById(long userId);
 
     List<ItemDto> getItemsByUserId(long userId);
 

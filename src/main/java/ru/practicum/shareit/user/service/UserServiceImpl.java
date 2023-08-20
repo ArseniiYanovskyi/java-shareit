@@ -1,8 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.model.AlreadyUsedException;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
@@ -17,10 +16,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserDao userRepository;
     private final String CORRECT_EMAIL_REGEXP = "\\S.*@\\S.*\\..*";
-    private final Logger log = LoggerFactory.getLogger("UserService");
 
     @Override
     public UserDto addUser(UserDto userDto) {

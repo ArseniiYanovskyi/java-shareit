@@ -8,15 +8,9 @@ import java.util.Optional;
 public interface ItemDao {
     Item addNewItem(Item item);
 
-    Item updateItemName(long userId, long itemId, String name);
-
-    Item updateItemNDescription(long userId, long itemId, String description);
-
-    Item updateItemAvailability(long userId, long itemId, Boolean isAvailable);
+    Item updateItem(Item item);
 
     Optional<Item> getItemById(long itemId);
-
-    List<Long> getIdOfUsersItems(long userId);
 
     List<Item> getItemsByUserId(long userId);
 

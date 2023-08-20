@@ -1,8 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -12,10 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Slf4j
 public class ItemController {
     private final ItemService itemService;
     private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
-    private final Logger log = LoggerFactory.getLogger("ItemController");
 
     @PostMapping
     public ItemDto addItem(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
@@ -38,7 +37,7 @@ public class ItemController {
     public ItemDto getById(@PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to get existed Item with id {}.", itemId);
 
-        return itemService.getItemById(itemId);
+        return itemService.getItemDtoById(itemId);
     }
 
     @GetMapping

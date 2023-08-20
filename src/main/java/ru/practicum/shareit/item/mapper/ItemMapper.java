@@ -22,16 +22,4 @@ public class ItemMapper {
                 .available(item.isAvailable())
                 .build();
     }
-
-    public static String getName(ItemDto itemDto) {
-        return itemDto.getName();
-    }
-
-    public static String getDescription(ItemDto itemDto) {
-        return itemDto.getDescription();
-    }
-
-    public static Boolean getAvailability(ItemDto itemDto) {
-        return itemDto.getAvailable();
-    }
 }

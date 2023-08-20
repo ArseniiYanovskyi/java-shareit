@@ -1,8 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.ValidationException;
@@ -18,10 +17,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemRepository;
     private final UserService userService;
-    private final Logger log = LoggerFactory.getLogger("ItemService");
 
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
@@ -42,36 +41,34 @@ public class ItemServiceImpl implements ItemService {
         userService.checkIsUserPresent(userId);
 
         long itemId = itemDto.getId();
-        checkIsItemPresent(itemId);
-        checkIfUserOwner(userId, itemId);
+        Item item = getItemById(itemId);
 
-        if (checkNameForUpdating(itemDto)) {
-            log.debug("Sending to DAO name for updating for item id {}.", itemId);
-            itemRepository.updateItemName(userId, itemId, getName(itemDto));
-        }
-        if (checkDescriptionForUpdating(itemDto)) {
-            log.debug("Sending to DAO description for updating for item id {}.", itemId);
-            itemRepository.updateItemNDescription(userId, itemId, getDescription(itemDto));
-        }
-        if (checkAvailableForUpdating(itemDto)) {
-            log.debug("Sending to DAO availability status for updating for item id {}.", itemId);
-            itemRepository.updateItemAvailability(userId, itemId, getAvailability(itemDto));
+        if (item.getOwnerId() != userId) {
+            throw new NotFoundException("Information about this user's item absent.");
         }
 
-        return getItemById(itemId);
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
+
+        log.debug("Sending to DAO updated item");
+        itemRepository.updateItem(item);
+
+        return getItemDtoById(itemId);
     }
 
+
     @Override
-    public ItemDto getItemById(long itemId) {
+    public ItemDto getItemDtoById(long itemId) {
         log.debug("Sending to DAO request to get item with id {}.", itemId);
         return convertToDto(itemRepository.getItemById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository.")));
-    }
-
-    @Override
-    public void checkIsItemPresent(long itemId) {
-        itemRepository.getItemById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
 
     @Override
@@ -122,53 +119,22 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private boolean checkNameForUpdating(ItemDto itemDto) {
-        if (itemDto.getName() != null) {
-            if (itemDto.getName().isBlank()) {
-                throw new ValidationException("Name is blank.");
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkDescriptionForUpdating(ItemDto itemDto) {
-        if (itemDto.getDescription() != null) {
-            if (itemDto.getDescription().isBlank()) {
-                throw new ValidationException("Description is blank.");
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkAvailableForUpdating(ItemDto itemDto) {
-        return itemDto.getAvailable() != null;
-    }
-
-    private void checkIfUserOwner(long userId, long itemId) {
-        if (!itemRepository.getIdOfUsersItems(userId).contains(itemId)) {
-            throw new NotFoundException("Information about this user's item absent.");
-        }
-    }
-
-    private Item convertToItem(long userId, ItemDto itemDto) {
-        return ItemMapper.convertToItem(userId, itemDto);
+    private Item getItemById(long itemId) {
+        log.debug("Sending to DAO request to get item with id {}.", itemId);
+        return itemRepository.getItemById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
 
     private ItemDto convertToDto(Item item) {
         return ItemMapper.convertToDto(item);
     }
 
-    private String getName(ItemDto itemDto) {
-        return ItemMapper.getName(itemDto);
+    private Item convertToItem(long userId, ItemDto itemDto) {
+        return ItemMapper.convertToItem(userId, itemDto);
     }
 
-    private String getDescription(ItemDto itemDto) {
-        return ItemMapper.getDescription(itemDto);
-    }
-
-    private Boolean getAvailability(ItemDto itemDto) {
-        return ItemMapper.getAvailability(itemDto);
+    private void checkIsItemPresent(long itemId) {
+        itemRepository.getItemById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
 }

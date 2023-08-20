@@ -1,8 +1,7 @@
 package ru.practicum.shareit.user.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
@@ -14,15 +13,15 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class InMemoryUserDao implements UserDao {
     private final HashMap<Long, User> users;
-    private final Logger log = LoggerFactory.getLogger("UserRepository");
     private long idCounter = 1;
 
     @Override
     public User addUser(User user) {
         log.debug("Received user to add as new one.");
-        long newUserId = idCounter++;
+        long newUserId = generateId();
 
         user.setId(newUserId);
         users.put(newUserId, user);
@@ -70,5 +69,9 @@ public class InMemoryUserDao implements UserDao {
     public void deleteUser(long userId) {
         log.debug("Received request to delete user with id {}.", userId);
         users.remove(userId);
+    }
+
+    private long generateId() {
+        return idCounter++;
     }
 }

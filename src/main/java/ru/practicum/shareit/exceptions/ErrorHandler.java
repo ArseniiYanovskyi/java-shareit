@@ -2,6 +2,7 @@ package ru.practicum.shareit.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exceptions.model.AlreadyUsedException;
@@ -9,31 +10,37 @@ import ru.practicum.shareit.exceptions.model.ErrorResponse;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.ValidationException;
 
+import static org.springframework.http.HttpStatus.*;
+
 @RestControllerAdvice
 @Slf4j
-public class ExceptionHandler {
-    private final String NOT_FOUND = HttpStatus.NOT_FOUND.toString();
-    private final String BAD_REQUEST = HttpStatus.BAD_REQUEST.toString();
-    private final String CONFLICT = HttpStatus.CONFLICT.toString();
+public class ErrorHandler {
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler
+    @ResponseStatus(NOT_FOUND)
     public ErrorResponse errorResponse(NotFoundException e) {
         log.debug("Returning {} answer with message: {}", NOT_FOUND, e.getMessage());
-        return new ErrorResponse(NOT_FOUND, e.getMessage());
+        return new ErrorResponse(NOT_FOUND.toString(), e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler
+    @ResponseStatus(BAD_REQUEST)
     public ErrorResponse errorResponse(ValidationException e) {
         log.debug("Returning {} answer with message: {}", BAD_REQUEST, e.getMessage());
-        return new ErrorResponse(BAD_REQUEST, e.getMessage());
+        return new ErrorResponse(BAD_REQUEST.toString(), e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler
+    @ResponseStatus(CONFLICT)
     public ErrorResponse errorResponse(AlreadyUsedException e) {
         log.debug("Returning {} answer with message: {}", CONFLICT, e.getMessage());
-        return new ErrorResponse(CONFLICT, e.getMessage());
+        return new ErrorResponse(CONFLICT.toString(), e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse errorResponse(Throwable e) {
+        log.debug("Returning {} answer with message: {}", INTERNAL_SERVER_ERROR, e.getMessage());
+        return new ErrorResponse(INTERNAL_SERVER_ERROR.toString(), e.getMessage());
     }
 }
