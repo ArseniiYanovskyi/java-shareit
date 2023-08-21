@@ -23,8 +23,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        checkNewUserDtoValidation(userDto);
-        checkIsEmailAvailable(getEmail(userDto));
+        checkIsUserValid(userDto);
+        checkIsEmailAvailable(userDto.getEmail());
 
         User user = convertToUser(userDto);
 
@@ -36,20 +36,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
         checkIsUserPresent(userId);
-        if (checkNameForUpdating(userDto)) {
-            log.debug("Sending to DAO name to update user {} information.", userId);
-
-            userRepository.updateUserName(userId, getName(userDto));
+        User user = getUserById(userId);
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
+            checkIsEmailAvailable(userDto.getEmail());
+            checkIsEmailValid(userDto.getEmail());
+            user.setEmail(userDto.getEmail());
         }
-        if (checkEmailForUpdating(userDto)) {
-            if (!getUserById(userId).getEmail().equals(getEmail(userDto))) {
-                checkIsEmailAvailable(getEmail(userDto));
-            }
-            log.debug("Sending to DAO email to update user {} information.", userId);
-
-            userRepository.updateUserEmail(userId, getEmail(userDto));
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
         }
-        return getUserById(userId);
+        log.debug("Sending to DAO updated user {} information.", userId);
+        return convertToDto(userRepository.updateUser(user));
     }
 
     @Override
@@ -62,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserById(long userId) {
+    public UserDto getUserDtoById(long userId) {
         log.debug("Sending to DAO request to get user with id {}.", userId);
 
         return convertToDto(userRepository.getUserById(userId)
@@ -85,7 +82,7 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteUser(userId);
     }
 
-    private void checkNewUserDtoValidation(UserDto userDto) {
+    private void checkIsUserValid(UserDto userDto) {
         if (userDto.getName() == null || userDto.getName().isBlank()) {
             throw new ValidationException("Name is blank");
         }
@@ -107,9 +104,9 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    private boolean checkEmailForUpdating(UserDto userDto) {
-        if (userDto.getEmail() != null) {
-            if (!userDto.getEmail().matches(CORRECT_EMAIL_REGEXP)) {
+    private boolean checkIsEmailValid(String email) {
+        if (email != null) {
+            if (!email.matches(CORRECT_EMAIL_REGEXP)) {
                 throw new ValidationException("Incorrect email");
             }
             return true;
@@ -123,19 +120,16 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    private User getUserById(long userId) {
+        return userRepository.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository."));
+    }
+
     private User convertToUser(UserDto userDto) {
         return UserMapper.convertToUser(userDto);
     }
 
     private UserDto convertToDto(User user) {
         return UserMapper.convertToDto(user);
-    }
-
-    private String getName(UserDto userDto) {
-        return UserMapper.getName(userDto);
-    }
-
-    private String getEmail(UserDto userDto) {
-        return UserMapper.getEmail(userDto);
     }
 }

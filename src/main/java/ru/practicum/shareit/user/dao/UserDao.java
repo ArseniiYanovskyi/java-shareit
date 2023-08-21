@@ -8,9 +8,7 @@ import java.util.Optional;
 public interface UserDao {
     User addUser(User user);
 
-    User updateUserName(long userId, String name);
-
-    User updateUserEmail(long userId, String email);
+    User updateUser(User user);
 
     Optional<User> getUserById(long userId);
 

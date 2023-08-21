@@ -35,7 +35,7 @@ public class UserController {
     public UserDto getUserById(@PathVariable(value = "userId") long userId) {
         log.debug("Received request to get existed user with id {}.", userId);
 
-        return userService.getUserById(userId);
+        return userService.getUserDtoById(userId);
     }
 
     @GetMapping

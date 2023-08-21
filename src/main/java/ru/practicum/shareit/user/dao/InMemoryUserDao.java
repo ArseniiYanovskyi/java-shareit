@@ -31,28 +31,24 @@ public class InMemoryUserDao implements UserDao {
     }
 
     @Override
-    public User updateUserName(long userId, String name) {
-        log.debug("Received new name for user with id {}.", userId);
-        users.get(userId).setName(name);
-        log.debug("User with id {} name updates successfully.", userId);
-        return users.get(userId);
-    }
+    public User updateUser(User user) {
+        log.debug("Received new information for user with id {}.", user.getId());
 
-    @Override
-    public User updateUserEmail(long userId, String email) {
-        log.debug("Received new email for user with id {}.", userId);
-        users.get(userId).setEmail(email);
-        log.debug("User with id {} email updates successfully.", userId);
-        return users.get(userId);
+        users.put(user.getId(), user);
+
+        log.debug("User with id {} name updates successfully.", user.getId());
+        return users.get(user.getId());
     }
 
     @Override
     public Optional<User> getUserById(long userId) {
+        log.debug("Received request to get user with id {}.", userId);
         return Optional.ofNullable(users.get(userId));
     }
 
     @Override
     public List<User> getAllUsers() {
+        log.debug("Received request to get all users.");
         return new ArrayList<>(users.values());
     }
 
