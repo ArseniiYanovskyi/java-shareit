@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.model.AlreadyUsedException;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.ValidationException;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,10 +19,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private final UserDao userRepository;
+    private final UserRepository userRepository;
     private final String CORRECT_EMAIL_REGEXP = "\\S.*@\\S.*\\..*";
 
     @Override
+    @Transactional
     public UserDto addUser(UserDto userDto) {
         checkIsUserValid(userDto);
         checkIsEmailAvailable(userDto.getEmail());
@@ -30,10 +32,11 @@ public class UserServiceImpl implements UserService {
 
         log.debug("Sending to DAO information to add new user.");
 
-        return convertToDto(userRepository.addUser(user));
+        return convertToDto(userRepository.save(user));
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(long userId, UserDto userDto) {
         checkIsUserPresent(userId);
         User user = getUserById(userId);
@@ -43,43 +46,46 @@ public class UserServiceImpl implements UserService {
             user.setEmail(userDto.getEmail());
         }
         if (userDto.getName() != null) {
+            checkNameForUpdating(userDto);
             user.setName(userDto.getName());
         }
         log.debug("Sending to DAO updated user {} information.", userId);
-        return convertToDto(userRepository.updateUser(user));
+        return convertToDto(userRepository.save(user));
     }
 
     @Override
+    @Transactional
     public List<UserDto> getAllUsers() {
         log.debug("Sending to DAO request to get all users.");
 
-        return userRepository.getAllUsers().stream()
+        return userRepository.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public UserDto getUserDtoById(long userId) {
         log.debug("Sending to DAO request to get user with id {}.", userId);
 
-        return convertToDto(userRepository.getUserById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository.")));
+        return convertToDto(getUserById(userId));
 
     }
 
     @Override
+    @Transactional
     public void checkIsUserPresent(long userId) {
-        userRepository.getUserById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository."));
+        getUserById(userId);
     }
 
     @Override
+    @Transactional
     public void deleteUser(long userId) {
         checkIsUserPresent(userId);
 
         log.debug("Sending to DAO request to delete user with id {}.", userId);
 
-        userRepository.deleteUser(userId);
+        userRepository.deleteById(userId);
     }
 
     private void checkIsUserValid(UserDto userDto) {
@@ -94,34 +100,26 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private boolean checkNameForUpdating(UserDto userDto) {
-        if (userDto.getName() != null) {
-            if (userDto.getName().isBlank()) {
-                throw new ValidationException("Name is blank");
-            }
-            return true;
+    private void checkNameForUpdating(UserDto userDto) {
+        if (userDto.getName().isBlank()) {
+            throw new ValidationException("Name is blank");
         }
-        return false;
     }
 
-    private boolean checkIsEmailValid(String email) {
-        if (email != null) {
-            if (!email.matches(CORRECT_EMAIL_REGEXP)) {
-                throw new ValidationException("Incorrect email");
-            }
-            return true;
+    private void checkIsEmailValid(String email) {
+        if (!email.matches(CORRECT_EMAIL_REGEXP)) {
+            throw new ValidationException("Incorrect email");
         }
-        return false;
     }
 
     private void checkIsEmailAvailable(String email) {
-        if (!userRepository.isEmailAvailable(email)) {
+        if (!userRepository.findByEmailContainingIgnoreCase(email).isEmpty()) {
             throw new AlreadyUsedException("Email already used.");
         }
     }
 
     private User getUserById(long userId) {
-        return userRepository.getUserById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository."));
     }
 

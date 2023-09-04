@@ -5,10 +5,17 @@ import ru.practicum.shareit.user.model.User;
 
 public class UserMapper {
     public static User convertToUser(UserDto userDto) {
-        return User.builder()
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
+        User user = new User();
+        if (userDto.getId() != 0) {
+            user.setId(userDto.getId());
+        }
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
+            user.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            user.setEmail(userDto.getEmail());
+        }
+        return user;
     }
 
     public static UserDto convertToDto(User user) {
