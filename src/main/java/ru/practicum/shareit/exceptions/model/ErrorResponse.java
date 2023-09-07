@@ -2,18 +2,17 @@ package ru.practicum.shareit.exceptions.model;
 
 public class ErrorResponse {
     String error;
-    String description;
+    String message;
 
-    public ErrorResponse(String error, String description) {
+    public ErrorResponse(String error, String message) {
         this.error = error;
-        this.description = description;
+        this.message = message;
     }
 
     public String getError() {
         return error;
     }
-
-    public String getDescription() {
-        return description;
+    public String getMessage() {
+        return message;
     }
 }

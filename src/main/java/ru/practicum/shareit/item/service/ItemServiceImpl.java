@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.ValidationException;
 import ru.practicum.shareit.item.dao.ItemRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -63,17 +63,33 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(itemDto.getAvailable());
         }
 
-        log.debug("Sending to DAO updated item");
+        log.debug("Sending to DAO updated item.");
         itemRepository.save(item);
 
         return getItemDtoById(itemId);
     }
 
+    @Override
+    @Transactional
+    public void setItemIsAvailable(long itemId, boolean isAvailable) {
+        Item item = getItemById(itemId);
+        item.setAvailable(isAvailable);
+        log.debug("Sending to DAO updated item {}.(is available = {})", itemId, isAvailable);
+        itemRepository.save(item);
+    }
 
     @Override
     @Transactional
     public ItemDto getItemDtoById(long itemId) {
         return convertToDto(getItemById(itemId));
+    }
+
+    @Override
+    @Transactional
+    public Item getItemById(long itemId) {
+        log.debug("Sending to DAO request to get item with id {}.", itemId);
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
 
     @Override
@@ -126,12 +142,6 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() == null || !itemDto.getAvailable()) {
             throw new ValidationException("Item is not available.");
         }
-    }
-
-    private Item getItemById(long itemId) {
-        log.debug("Sending to DAO request to get item with id {}.", itemId);
-        return itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
 
     private ItemDto convertToDto(Item item) {

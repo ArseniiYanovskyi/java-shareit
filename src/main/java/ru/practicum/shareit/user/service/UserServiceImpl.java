@@ -7,7 +7,7 @@ import ru.practicum.shareit.exceptions.model.AlreadyUsedException;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.ValidationException;
 import ru.practicum.shareit.user.dao.UserRepository;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto addUser(UserDto userDto) {
         checkIsUserValid(userDto);
-        checkIsEmailAvailable(userDto.getEmail());
+        //checkIsEmailAvailable(userDto.getEmail());
 
         User user = convertToUser(userDto);
 
@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto updateUser(long userId, UserDto userDto) {
-        checkIsUserPresent(userId);
         User user = getUserById(userId);
         if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
             checkIsEmailAvailable(userDto.getEmail());
@@ -71,6 +70,12 @@ public class UserServiceImpl implements UserService {
         return convertToDto(getUserById(userId));
 
     }
+    @Override
+    @Transactional
+    public User getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository."));
+    }
 
     @Override
     @Transactional
@@ -92,12 +97,12 @@ public class UserServiceImpl implements UserService {
         if (userDto.getName() == null || userDto.getName().isBlank()) {
             throw new ValidationException("Name is blank");
         }
-        if (userDto.getEmail() == null) {
+        /*if (userDto.getEmail() == null) {
             throw new ValidationException("Email information empty.");
         }
         if (!userDto.getEmail().matches(CORRECT_EMAIL_REGEXP)) {
             throw new ValidationException("Incorrect email");
-        }
+        }*/
     }
 
     private void checkNameForUpdating(UserDto userDto) {
@@ -118,10 +123,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User getUserById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id " + userId + " does not present in repository."));
-    }
 
     private User convertToUser(UserDto userDto) {
         return UserMapper.convertToUser(userDto);
