@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.model.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.utils.BookingServiceUtils;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.UnknownStateException;
@@ -71,24 +71,24 @@ public class BookingServiceImpl implements BookingService {
                 resultList = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                resultList =  bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
-                                (LocalDateTime.now(), LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), LocalDateTime.now(), userId);
                 break;
             case "PAST":
-                resultList =  bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
-                                (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId);
                 break;
             case "FUTURE":
-                resultList =  bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
-                                (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId);
                 break;
             case "WAITING":
-                resultList =  bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                                (Status.WAITING, userId);
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
+                        (Status.WAITING, userId);
                 break;
             case "REJECTED":
-                resultList =  bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                                (Status.REJECTED, userId);
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
+                        (Status.REJECTED, userId);
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -105,27 +105,27 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> resultList;
         switch (state) {
             case "ALL":
-                resultList =  bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
+                resultList = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                resultList =  bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                                (LocalDateTime.now(), LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), LocalDateTime.now(), userId);
                 break;
             case "PAST":
-                resultList =  bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
-                                (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId);
                 break;
             case "FUTURE":
-                resultList =  bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                                (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId);
                 break;
             case "WAITING":
-                resultList =  bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                                (Status.WAITING, userId);
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
+                        (Status.WAITING, userId);
                 break;
             case "REJECTED":
-                resultList =  bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                                (Status.REJECTED, userId);
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
+                        (Status.REJECTED, userId);
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -133,6 +133,20 @@ public class BookingServiceImpl implements BookingService {
         return resultList.stream()
                 .map(BookingMapper::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public BookingDto getLastBookingForItem(long itemId) {
+        log.debug("Sending to DAO request to get last booking for item {}.", itemId);
+        return utils.convertToDto(bookingRepository.findLastBooking(itemId, LocalDateTime.now()));
+    }
+
+    @Override
+    @Transactional
+    public BookingDto getNextBookingForItem(long itemId) {
+        log.debug("Sending to DAO request to get next booking for item {}.", itemId);
+        return utils.convertToDto(bookingRepository.findNextBooking(itemId, LocalDateTime.now()));
     }
 
     private Booking getBookingById(long bookingId) {

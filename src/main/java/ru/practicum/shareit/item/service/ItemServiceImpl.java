@@ -3,12 +3,17 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.dto.BookingDto;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
-import ru.practicum.shareit.exceptions.model.ValidationException;
+import ru.practicum.shareit.item.Comment.CommentRepository;
+import ru.practicum.shareit.item.Comment.model.Comment;
+import ru.practicum.shareit.item.Comment.model.CommentDto;
 import ru.practicum.shareit.item.dao.ItemRepository;
-import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.service.utils.ItemServiceUtils;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -23,22 +28,25 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final BookingService bookingService;
+    private final CommentRepository commentRepository;
     private final UserService userService;
+    private final ItemServiceUtils utils;
 
     @Override
     @Transactional
     public ItemDto addItem(long userId, ItemDto itemDto) {
-        checkItemDtoValidation(itemDto);
-        checkIsItemAvailable(itemDto);
+        utils.checkItemDtoValidation(itemDto);
+        utils.checkIsItemAvailable(itemDto);
 
         User owner = UserMapper.convertToUser(userService.getUserDtoById(userId));
 
-        Item item = convertToItem(itemDto, owner);
+        Item item = utils.convertToItem(itemDto, owner);
 
         log.debug("Sending to DAO item to create with name {} and description {} from user {}.",
                 item.getName(), item.getDescription(), userId);
 
-        return convertToDto(itemRepository.save(item));
+        return utils.convertToDto(itemRepository.save(item));
     }
 
     @Override
@@ -81,7 +89,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto getItemDtoById(long itemId) {
-        return convertToDto(getItemById(itemId));
+        ItemDto itemDto = utils.convertToDto(getItemById(itemId));
+        itemDto.setComments(commentRepository.findAllByItem_IdOrderByIdDesc(itemId));
+        return itemDto;
     }
 
     @Override
@@ -103,6 +113,19 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream()
                 .map(ItemMapper::convertToDto)
+                .peek(itemDto -> {
+                    BookingDto lastBooking = bookingService.getLastBookingForItem(itemDto.getId());
+                    if (lastBooking != null) {
+                        itemDto.setLastBooking(lastBooking);
+                    }
+                })
+                .peek(itemDto -> {
+                    BookingDto nextBooking = bookingService.getNextBookingForItem(itemDto.getId());
+                    if (nextBooking != null) {
+                        itemDto.setNextBooking(nextBooking);
+                    }
+                })
+                .peek(itemDto -> itemDto.setComments(commentRepository.findAllByItem_Owner_IdOrderByIdDesc(userId)))
                 .collect(Collectors.toList());
     }
 
@@ -123,39 +146,19 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
+    public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
+        utils.checkIfUserRentedItem(userId, itemId);
+        Comment comment = utils.createComment(commentDto, userId, getItemById(itemId));
+        log.debug("Sending to DAO request to add new comment from user {} to item {}.", userId, itemId);
+
+        return utils.convertToDto(commentRepository.save(comment));
+    }
+
+    @Override
+    @Transactional
     public void deleteUserItems(long userId) {
         //проверка наличия пользователя отсутствует потому что метод вызывается после удаления пользователя
         log.debug("Sending to DAO request to delete user id {} items.", userId);
         itemRepository.deleteById(userId);
-    }
-
-    private void checkItemDtoValidation(ItemDto itemDto) {
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new ValidationException("Name is blank.");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new ValidationException("Description is blank.");
-        }
-    }
-
-    private void checkIsItemAvailable(ItemDto itemDto) {
-        if (itemDto.getAvailable() == null || !itemDto.getAvailable()) {
-            throw new ValidationException("Item is not available.");
-        }
-    }
-
-    private ItemDto convertToDto(Item item) {
-        return ItemMapper.convertToDto(item);
-    }
-
-    private Item convertToItem(ItemDto itemDto, User owner) {
-        return ItemMapper.convertToItem(itemDto, owner);
-    }
-
-    private void checkIsItemPresent(long itemId) {
-        Item item = itemRepository.getReferenceById(itemId);
-        if (item.getName() == null || item.getDescription() == null || item.getOwner() == null) {
-            throw new NotFoundException("Item with id " + itemId + " does not present in repository.");
-        }
     }
 }

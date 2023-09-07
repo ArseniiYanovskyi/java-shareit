@@ -1,7 +1,9 @@
 package ru.practicum.shareit.item.mapper;
 
-import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.Comment.model.Comment;
+import ru.practicum.shareit.item.Comment.model.CommentDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.user.model.User;
 
 public class ItemMapper {
@@ -16,11 +18,7 @@ public class ItemMapper {
         if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
             item.setDescription(itemDto.getDescription());
         }
-        if (!itemDto.getAvailable().booleanValue()) {
-            item.setAvailable(false);
-        } else {
-            item.setAvailable(true);
-        }
+        item.setAvailable(itemDto.getAvailable().booleanValue());
         if (owner != null) {
             item.setOwner(owner);
         }
@@ -33,6 +31,16 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.isAvailable())
+                .build();
+    }
+
+    public static CommentDto convertToDto(Comment comment) {
+        return CommentDto.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .authorName(comment.getAuthor().getName())
+                .itemName(comment.getItem().getName())
+                .creationDate(comment.getCreationDate())
                 .build();
     }
 }

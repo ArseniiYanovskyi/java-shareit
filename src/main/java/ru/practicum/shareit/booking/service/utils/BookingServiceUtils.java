@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class BookingServiceUtils {
     private final ItemService itemService;
     private final UserService userService;
+
     public Booking checkAndConvertToBooking(long userId, BookingDto bookingDto, LocalDateTime rentalEnd) {
         User booker = userService.getUserById(userId);
         Item item = itemService.getItemById(bookingDto.getItemId());

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -13,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @NoArgsConstructor
 @Data
-@Table(name="items")
+@Table(name = "items")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
