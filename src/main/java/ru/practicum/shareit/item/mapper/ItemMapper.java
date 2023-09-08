@@ -18,7 +18,7 @@ public class ItemMapper {
         if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
             item.setDescription(itemDto.getDescription());
         }
-        item.setAvailable(itemDto.getAvailable().booleanValue());
+        item.setIsAvailable(itemDto.getAvailable());
         if (owner != null) {
             item.setOwner(owner);
         }
@@ -30,7 +30,7 @@ public class ItemMapper {
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
-                .available(item.isAvailable())
+                .available(item.getIsAvailable())
                 .build();
     }
 
@@ -40,7 +40,7 @@ public class ItemMapper {
                 .text(comment.getText())
                 .authorName(comment.getAuthor().getName())
                 .itemName(comment.getItem().getName())
-                .creationDate(comment.getCreationDate())
+                .created(comment.getCreationDate())
                 .build();
     }
 }

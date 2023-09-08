@@ -14,7 +14,6 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    //private final ItemService itemService;
 
     @PostMapping
     public UserDto addUser(@RequestBody UserDto userDto) {

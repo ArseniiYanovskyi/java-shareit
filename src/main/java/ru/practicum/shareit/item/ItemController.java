@@ -43,10 +43,11 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable(value = "itemId") long itemId) {
+    public ItemDto getById(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+                           @PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to get existed Item with id {}.", itemId);
 
-        return itemService.getItemDtoById(itemId);
+        return itemService.getItemDtoById(itemId, userId);
     }
 
     @GetMapping

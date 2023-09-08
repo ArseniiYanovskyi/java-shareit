@@ -3,7 +3,8 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.model.dto.BookingDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.item.Comment.CommentRepository;
@@ -21,6 +22,7 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,29 +70,36 @@ public class ItemServiceImpl implements ItemService {
             item.setDescription(itemDto.getDescription());
         }
         if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
+            item.setIsAvailable(itemDto.getAvailable());
         }
 
         log.debug("Sending to DAO updated item.");
         itemRepository.save(item);
 
-        return getItemDtoById(itemId);
+        return getItemDtoById(itemId, userId);
     }
 
     @Override
     @Transactional
-    public void setItemIsAvailable(long itemId, boolean isAvailable) {
+    public ItemDto getItemDtoById(long itemId, long userId) {
         Item item = getItemById(itemId);
-        item.setAvailable(isAvailable);
-        log.debug("Sending to DAO updated item {}.(is available = {})", itemId, isAvailable);
-        itemRepository.save(item);
-    }
+        ItemDto itemDto = utils.convertToDto(item);
 
-    @Override
-    @Transactional
-    public ItemDto getItemDtoById(long itemId) {
-        ItemDto itemDto = utils.convertToDto(getItemById(itemId));
-        itemDto.setComments(commentRepository.findAllByItem_IdOrderByIdDesc(itemId));
+        if (item.getOwner().getId() == userId) {
+            Optional<Booking> lastBooking = Optional.ofNullable
+                    (bookingService.getLastBookingForItem(itemDto.getId()));
+            Optional<Booking> nextBooking = Optional.ofNullable
+                    (bookingService.getNextBookingForItem(itemDto.getId()));
+            lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
+            nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
+        }
+
+        itemDto.setComments(
+                commentRepository.findAllByItem_IdOrderByIdDesc(itemId).stream()
+                        .map(ItemMapper::convertToDto)
+                        .collect(Collectors.toList())
+        );
+
         return itemDto;
     }
 
@@ -109,23 +118,25 @@ public class ItemServiceImpl implements ItemService {
 
         log.debug("Sending to DAO request for get items by user id {}.", userId);
 
-        List<Item> items = itemRepository.findAllByOwner_Id(userId);
+        List<Item> items = itemRepository.findAllByOwner_IdOrderByIdAsc(userId);
 
         return items.stream()
                 .map(ItemMapper::convertToDto)
                 .peek(itemDto -> {
-                    BookingDto lastBooking = bookingService.getLastBookingForItem(itemDto.getId());
-                    if (lastBooking != null) {
-                        itemDto.setLastBooking(lastBooking);
-                    }
+                    Optional<Booking> lastBooking = Optional.ofNullable
+                            (bookingService.getLastBookingForItem(itemDto.getId()));
+                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
                 })
                 .peek(itemDto -> {
-                    BookingDto nextBooking = bookingService.getNextBookingForItem(itemDto.getId());
-                    if (nextBooking != null) {
-                        itemDto.setNextBooking(nextBooking);
-                    }
+                    Optional<Booking> nextBooking = Optional.ofNullable
+                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
                 })
-                .peek(itemDto -> itemDto.setComments(commentRepository.findAllByItem_Owner_IdOrderByIdDesc(userId)))
+                .peek(itemDto -> itemDto.setComments(
+                        commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
+                                .map(ItemMapper::convertToDto)
+                                .collect(Collectors.toList())
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -139,7 +150,7 @@ public class ItemServiceImpl implements ItemService {
         List<Item> items = itemRepository.findAllByDescriptionContainsIgnoreCase(text);
 
         return items.stream()
-                .filter(Item::isAvailable)
+                .filter(Item::getIsAvailable)
                 .map(ItemMapper::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -148,7 +159,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         utils.checkIfUserRentedItem(userId, itemId);
-        Comment comment = utils.createComment(commentDto, userId, getItemById(itemId));
+        Item item = getItemById(itemId);
+        Comment comment = utils.createComment(commentDto, userId, item);
         log.debug("Sending to DAO request to add new comment from user {} to item {}.", userId, itemId);
 
         return utils.convertToDto(commentRepository.save(comment));

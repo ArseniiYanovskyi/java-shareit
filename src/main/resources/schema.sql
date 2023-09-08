@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS comments (
                                                 key,
     item_id integer references items (id) on delete cascade,
     author_id integer references users (id) on delete cascade,
-    text varchar(500) not null,
-    creation_date timestamp default now()
+    comment_text varchar(500),
+    creation_date timestamp
 );
 

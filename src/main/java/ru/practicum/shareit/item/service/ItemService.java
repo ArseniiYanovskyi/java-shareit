@@ -11,9 +11,7 @@ public interface ItemService {
 
     ItemDto updateItem(long userId, ItemDto itemDto);
 
-    void setItemIsAvailable(long itemId, boolean isAvailable);
-
-    ItemDto getItemDtoById(long userId);
+    ItemDto getItemDtoById(long itemId, long userId);
 
     Item getItemById(long itemId);
 

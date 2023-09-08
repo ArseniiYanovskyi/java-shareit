@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -49,6 +50,7 @@ public class ItemServiceUtils {
         if (usersBookings.stream()
                 .filter(bookingDto -> bookingDto.getItem().getId() == itemId)
                 .filter(bookingDto -> bookingDto.getStatus().equals("APPROVED"))
+                .filter(bookingDto -> bookingDto.getStart().isBefore(LocalDateTime.now()))
                 .count() == 0) {
             throw new ValidationException("This user wasn't rented item.");
         }
@@ -56,17 +58,17 @@ public class ItemServiceUtils {
 
     public Comment createComment(CommentDto commentDto, long userId, Item item) {
         Comment comment = new Comment();
-        if (commentDto.getId() != 0) {
-            comment.setId(commentDto.getId());
-        }
-        if (commentDto.getText() == null) {
+        if (commentDto.getText() == null || commentDto.getText().isBlank()) {
             throw new ValidationException("Comment text can not be empty.");
         } else {
             comment.setText(commentDto.getText());
         }
         User author = userService.getUserById(userId);
+
         comment.setAuthor(author);
         comment.setItem(item);
+        comment.setCreationDate(LocalDateTime.now());
+
         return comment;
     }
 

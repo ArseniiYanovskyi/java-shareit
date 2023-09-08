@@ -12,9 +12,11 @@ import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.service.utils.BookingServiceUtils;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.exceptions.model.UnknownStateException;
+import ru.practicum.shareit.exceptions.model.ValidationException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,8 +30,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto createBooking(long userId, BookingDto bookingDto) {
-        LocalDateTime rentalEnd = bookingRepository.findRentalEndForBookingId(bookingDto.getItemId());
-        Booking booking = utils.checkAndConvertToBooking(userId, bookingDto, rentalEnd);
+        Booking booking = utils.checkAndConvertToBooking(userId, bookingDto);
         booking.setStatus(Status.WAITING);
 
         log.debug("Sending to DAO request to create new booking information.");
@@ -41,9 +42,12 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto setStatus(long userId, long bookingId, boolean isApproved) {
         Booking booking = getBookingById(bookingId);
         utils.checkIsUserOwner(userId, booking);
+        if ((isApproved && booking.getStatus().equals(Status.APPROVED))
+                || (isApproved && booking.getStatus().equals(Status.REJECTED))) {
+            throw new ValidationException("Booking already has this status.");
+        }
         if (isApproved) {
             booking.setStatus(Status.APPROVED);
-            utils.setNotAvailableToItem(booking.getItem().getId());
         }
         if (!isApproved) {
             booking.setStatus(Status.REJECTED);
@@ -65,6 +69,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public List<BookingDto> getUsersBookings(long userId, String state) {
         log.debug("Sending to DAO request to get user {} bookings.", userId);
+        utils.checkIfUserPresent(userId);
         List<Booking> resultList;
         switch (state) {
             case "ALL":
@@ -102,6 +107,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public List<BookingDto> getUsersItemsBookings(long userId, String state) {
         log.debug("Sending to DAO request to get user's {} items bookings.", userId);
+        utils.checkIfUserPresent(userId);
         List<Booking> resultList;
         switch (state) {
             case "ALL":
@@ -137,16 +143,23 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto getLastBookingForItem(long itemId) {
+    public Booking getLastBookingForItem(long itemId) {
         log.debug("Sending to DAO request to get last booking for item {}.", itemId);
-        return utils.convertToDto(bookingRepository.findLastBooking(itemId, LocalDateTime.now()));
+        return bookingRepository.findAllByItem_Id(itemId).stream()
+                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                .max(Comparator.comparing(Booking::getEnd))
+                .orElse(null);
     }
 
     @Override
     @Transactional
-    public BookingDto getNextBookingForItem(long itemId) {
+    public Booking getNextBookingForItem(long itemId) {
         log.debug("Sending to DAO request to get next booking for item {}.", itemId);
-        return utils.convertToDto(bookingRepository.findNextBooking(itemId, LocalDateTime.now()));
+        return bookingRepository.findAllByItem_Id(itemId).stream()
+                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .filter(booking -> booking.getStatus().equals(Status.APPROVED))
+                .min(Comparator.comparing(Booking::getStart))
+                .orElse(null);
     }
 
     private Booking getBookingById(long bookingId) {
