@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.user.model.dto;
 
 import lombok.Builder;
 import lombok.Data;
