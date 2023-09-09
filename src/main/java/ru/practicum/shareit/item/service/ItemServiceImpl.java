@@ -90,8 +90,8 @@ public class ItemServiceImpl implements ItemService {
                     (bookingService.getLastBookingForItem(itemDto.getId()));
             Optional<Booking> nextBooking = Optional.ofNullable
                     (bookingService.getNextBookingForItem(itemDto.getId()));
-            lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
-            nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
+            lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
+            nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
         }
 
         itemDto.setComments(
@@ -122,21 +122,25 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream()
                 .map(ItemMapper::convertToDto)
-                .peek(itemDto -> {
+                .map(itemDto -> {
                     Optional<Booking> lastBooking = Optional.ofNullable
                             (bookingService.getLastBookingForItem(itemDto.getId()));
-                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
+                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
+                    return itemDto;
                 })
-                .peek(itemDto -> {
+                .map(itemDto -> {
                     Optional<Booking> nextBooking = Optional.ofNullable
                             (bookingService.getNextBookingForItem(itemDto.getId()));
-                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
+                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
+                    return itemDto;
                 })
-                .peek(itemDto -> itemDto.setComments(
-                        commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
-                                .map(ItemMapper::convertToDto)
-                                .collect(Collectors.toList())
-                ))
+                .map(itemDto -> {
+                    itemDto.setComments(
+                            commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
+                                    .map(ItemMapper::convertToDto)
+                                    .collect(Collectors.toList()));
+                    return itemDto;
+                })
                 .collect(Collectors.toList());
     }
 

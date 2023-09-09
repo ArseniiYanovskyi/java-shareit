@@ -26,7 +26,7 @@ public class Booking {
     @ManyToOne(fetch = FetchType.EAGER)
     private User booker;
     @JoinColumn(name = "item_id", nullable = false)
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Item item;
     @Column(name = "status")

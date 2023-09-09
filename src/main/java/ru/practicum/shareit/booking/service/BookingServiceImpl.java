@@ -16,7 +16,6 @@ import ru.practicum.shareit.exceptions.model.ValidationException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -145,21 +144,16 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public Booking getLastBookingForItem(long itemId) {
         log.debug("Sending to DAO request to get last booking for item {}.", itemId);
-        return bookingRepository.findAllByItem_Id(itemId).stream()
-                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
-                .max(Comparator.comparing(Booking::getEnd))
-                .orElse(null);
+        return bookingRepository.findFirstByItem_IdAndStartIsBeforeOrderByStartDesc
+                (itemId, LocalDateTime.now()).orElse(null);
     }
 
     @Override
     @Transactional
     public Booking getNextBookingForItem(long itemId) {
         log.debug("Sending to DAO request to get next booking for item {}.", itemId);
-        return bookingRepository.findAllByItem_Id(itemId).stream()
-                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
-                .filter(booking -> booking.getStatus().equals(Status.APPROVED))
-                .min(Comparator.comparing(Booking::getStart))
-                .orElse(null);
+        return bookingRepository.findFirstByItem_IdAndStartIsAfterAndStatusOrderByStartAsc
+                (itemId, LocalDateTime.now(), Status.APPROVED).orElse(null);
     }
 
     private Booking getBookingById(long bookingId) {
