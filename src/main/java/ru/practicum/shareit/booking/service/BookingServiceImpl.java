@@ -3,6 +3,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -104,6 +106,50 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
+    public List<BookingDto> getUsersBookingsPagination(long userId, String state, int from, int size) {
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
+        if (size < 1) {
+            throw new ValidationException("Size is too small.");
+        }
+        log.debug("Sending to DAO request to get user {} bookings pagination.", userId);
+        utils.checkIfUserPresent(userId);
+        Page<Booking> resultList;
+        switch (state) {
+            case "ALL":
+                resultList = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId, PageRequest.of(from / size, size));
+                break;
+            case "CURRENT":
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                break;
+            case "PAST":
+                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                break;
+            case "FUTURE":
+                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                break;
+            case "WAITING":
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
+                        (Status.WAITING, userId, PageRequest.of(from / size, size));
+                break;
+            case "REJECTED":
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
+                        (Status.REJECTED, userId, PageRequest.of(from / size, size));
+                break;
+            default:
+                throw new UnknownStateException("Unknown state: " + state);
+        }
+        return resultList.stream()
+                .map(BookingMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public List<BookingDto> getUsersItemsBookings(long userId, String state) {
         log.debug("Sending to DAO request to get user's {} items bookings.", userId);
         utils.checkIfUserPresent(userId);
@@ -131,6 +177,51 @@ public class BookingServiceImpl implements BookingService {
             case "REJECTED":
                 resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
                         (Status.REJECTED, userId);
+                break;
+            default:
+                throw new UnknownStateException("Unknown state: " + state);
+        }
+        return resultList.stream()
+                .map(BookingMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<BookingDto> getUsersItemsBookingsPagination(long userId, String state, int from, int size) {
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
+        if (size < 1) {
+            throw new ValidationException("Size is too small.");
+        }
+        log.debug("Sending to DAO request to get user's {} items bookings pagination.", userId);
+        utils.checkIfUserPresent(userId);
+        Page<Booking> resultList;
+        switch (state) {
+            case "ALL":
+                resultList = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc
+                        (userId, PageRequest.of(from / size, size));
+                break;
+            case "CURRENT":
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                break;
+            case "PAST":
+                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                break;
+            case "FUTURE":
+                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                break;
+            case "WAITING":
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
+                        (Status.WAITING, userId, PageRequest.of(from / size, size));
+                break;
+            case "REJECTED":
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
+                        (Status.REJECTED, userId, PageRequest.of(from / size, size));
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);

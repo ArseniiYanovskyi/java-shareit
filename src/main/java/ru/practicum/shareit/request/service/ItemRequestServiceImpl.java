@@ -56,11 +56,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional
     public List<ItemRequestDto> getOtherUsersRequestsPagination(long userId, int from, int size) {
         log.debug("Sending to DAO request from user {} to get other users ItemRequests.", userId);
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
         if (size < 1) {
             throw new ValidationException("Size is too small.");
         }
 
-        return repository.findAllByPublisherIsNotOrderByCreationDateDesc(userId, PageRequest.of(from, size))
+        return repository.findAllByPublisherIsNotOrderByCreationDateDesc(userId, PageRequest.of(from / size, size))
                 .stream()
                 .map(utils::convertToDto)
                 .collect(Collectors.toList());

@@ -17,7 +17,11 @@ public interface ItemService {
 
     List<ItemDto> getItemsByUserId(long userId);
 
+    List<ItemDto> getItemsByUserIdPagination(long userId, int from, int size);
+
     List<ItemDto> searchInDescription(String text);
+
+    List<ItemDto> searchInDescriptionPagination(String text, int from, int size);
 
     CommentDto addComment(long userId, long itemId, CommentDto commentDto);
 

@@ -43,17 +43,25 @@ public class BookingController {
 
     @GetMapping()
     public List<BookingDto> getUsersBookings(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
-                                             @RequestParam(defaultValue = "ALL") String state) {
+                                             @RequestParam(defaultValue = "ALL") String state,
+                                             @RequestParam(value = "from", required = false) Integer from,
+                                             @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request to get bookings of user {}.", userId);
-
+        if (from != null && size != null) {
+            return bookingService.getUsersBookingsPagination(userId, state, from, size);
+        }
         return bookingService.getUsersBookings(userId, state);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getUsersItemsBookings(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
-                                                  @RequestParam(defaultValue = "ALL") String state) {
+                                                  @RequestParam(defaultValue = "ALL") String state,
+                                                  @RequestParam(value = "from", required = false) Integer from,
+                                                  @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request to get user {} items bookings.", userId);
-
+        if (from != null && size != null) {
+            return bookingService.getUsersItemsBookingsPagination(userId, state, from, size);
+        }
         return bookingService.getUsersItemsBookings(userId, state);
     }
 }
