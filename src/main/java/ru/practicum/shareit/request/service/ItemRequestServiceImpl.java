@@ -60,12 +60,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new ValidationException("Size is too small.");
         }
 
-        /*return repository.findAll().stream()
-                .sorted(Comparator.comparing(ItemRequest::getCreationDate))
-                .limit(from+size)
-                .skip(from)
-                .map(utils::convertToDto)
-                .collect(Collectors.toList());*/
         return repository.findAllByPublisherIsNotOrderByCreationDateDesc(userId, PageRequest.of(from, size))
                 .stream()
                 .map(utils::convertToDto)
