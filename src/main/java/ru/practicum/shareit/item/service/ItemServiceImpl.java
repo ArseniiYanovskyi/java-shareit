@@ -177,4 +177,13 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Sending to DAO request to delete user id {} items.", userId);
         itemRepository.deleteById(userId);
     }
+
+    @Override
+    @Transactional
+    public List<ItemDto> getItemsForRequest(long requestId) {
+        log.debug("Sending to DAO request to get items for request {}.", requestId);
+        return itemRepository.findAllByRequest(requestId).stream()
+                .map(ItemMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
 }

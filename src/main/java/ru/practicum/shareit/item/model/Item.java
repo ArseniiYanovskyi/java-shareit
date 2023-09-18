@@ -30,4 +30,6 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
+
+    private long request;
 }
