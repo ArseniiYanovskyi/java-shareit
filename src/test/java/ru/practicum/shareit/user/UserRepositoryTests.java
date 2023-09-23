@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @DataJpaTest
 @DisplayName("UserRepository")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserRepositoryTests {
     @Autowired
     UserRepository userRepository;
@@ -25,7 +26,7 @@ public class UserRepositoryTests {
     private User fifthUser;
     private User sixthUser;
 
-    @BeforeEach
+    @BeforeAll
     void beforeEach() {
         firstUser = userRepository.save(new User(1L, "FirstUser", "FirstUser@somemail.com"));
         secondUser = userRepository.save(new User(2L, "SecondUser", "SecondUser@somemail.com"));
@@ -45,6 +46,8 @@ public class UserRepositoryTests {
         expectingResult.add(sixthUser);
 
         List<User> actualResult = userRepository.findByEmailContainingIgnoreCase("thu");
+
+        assertThat(expectingResult.size(), equalTo(actualResult.size()));
 
         assertThat(expectingResult.get(0).getId(), equalTo(actualResult.get(0).getId()));
         assertThat(expectingResult.get(0).getName(), equalTo(actualResult.get(0).getName()));

@@ -27,9 +27,23 @@ import static org.hamcrest.Matchers.equalTo;
 public class UserServiceImplTests {
     private final EntityManager entityManager;
     private final UserServiceImpl userService;
-
+    private UserDto firstUserDto;
+    private UserDto secondUserDto;
+    private UserDto thirdUserDto;
     @BeforeEach
     void beforeEach() {
+        firstUserDto = UserDto.builder()
+                    .name("FirstUser")
+                    .email("FirstUser@somemail.com")
+                    .build();
+        secondUserDto = UserDto.builder()
+                    .name("SecondUser")
+                    .email("SecondUser@somemail.com")
+                    .build();
+        thirdUserDto = UserDto.builder()
+                    .name("ThirdUser")
+                    .email("ThirdUser@somemail.com")
+                    .build();
     }
 
     @AfterEach
@@ -40,7 +54,6 @@ public class UserServiceImplTests {
     @Order(value = 1)
     @DisplayName("1 - should create users.")
     void shouldCreateUsers() {
-        UserDto firstUserDto = createFirstUserDto();
         firstUserDto = userService.addUser(firstUserDto);
 
         TypedQuery<User> firstUserQuery = entityManager.createQuery
@@ -53,7 +66,6 @@ public class UserServiceImplTests {
         assertThat(firstUser.getName(), equalTo(firstUserDto.getName()));
         assertThat(firstUser.getEmail(), equalTo(firstUserDto.getEmail()));
 
-        UserDto secondUserDto = createSecondUserDto();
         secondUserDto = userService.addUser(secondUserDto);
 
         TypedQuery<User> secondUserQuery = entityManager.createQuery
@@ -66,7 +78,6 @@ public class UserServiceImplTests {
         assertThat(secondUser.getName(), equalTo(secondUserDto.getName()));
         assertThat(secondUser.getEmail(), equalTo(secondUserDto.getEmail()));
 
-        UserDto thirdUserDto = createThirdUserDto();
         thirdUserDto = userService.addUser(thirdUserDto);
 
         TypedQuery<User> thirdUserQuery = entityManager.createQuery
@@ -84,7 +95,6 @@ public class UserServiceImplTests {
     @Order(value = 2)
     @DisplayName("2 - should update users.")
     void shouldUpdateUsers() {
-        UserDto firstUserDto = createFirstUserDto();
         firstUserDto = userService.addUser(firstUserDto);
         firstUserDto.setName("FirstUserUpdated");
         firstUserDto.setEmail("FirstUserUpdated@somemail.com");
@@ -100,7 +110,6 @@ public class UserServiceImplTests {
         assertThat(firstUser.getName(), equalTo(firstUserDto.getName()));
         assertThat(firstUser.getEmail(), equalTo(firstUserDto.getEmail()));
 
-        UserDto secondUserDto = createSecondUserDto();
         secondUserDto = userService.addUser(secondUserDto);
         secondUserDto.setName("SecondUserUpdated");
         secondUserDto.setEmail("SecondUserUpdated@somemail.com");
@@ -116,7 +125,6 @@ public class UserServiceImplTests {
         assertThat(secondUser.getName(), equalTo(secondUserDto.getName()));
         assertThat(secondUser.getEmail(), equalTo(secondUserDto.getEmail()));
 
-        UserDto thirdUserDto = createThirdUserDto();
         thirdUserDto = userService.addUser(thirdUserDto);
         thirdUserDto.setName("ThirdUserUpdated");
         thirdUserDto.setEmail("ThirdUserUpdated@somemail.com");
@@ -137,7 +145,6 @@ public class UserServiceImplTests {
     @Order(value = 3)
     @DisplayName("3 - should get user DTO by id.")
     void shouldGetUserDtoById() {
-        UserDto firstUserDto = createFirstUserDto();
         firstUserDto = userService.addUser(firstUserDto);
 
         UserDto resultingDto = userService.getUserDtoById(firstUserDto.getId());
@@ -152,7 +159,6 @@ public class UserServiceImplTests {
     @Order(value = 4)
     @DisplayName("4 - should get user by id.")
     void shouldGetUserById() {
-        UserDto firstUserDto = createFirstUserDto();
         firstUserDto = userService.addUser(firstUserDto);
 
         User resultingUser = userService.getUserById(firstUserDto.getId());
@@ -167,13 +173,10 @@ public class UserServiceImplTests {
     @Order(value = 5)
     @DisplayName("5 - should get all users.")
     void shouldGetAllUsers() {
-        UserDto firstUserDto = createFirstUserDto();
         firstUserDto = userService.addUser(firstUserDto);
 
-        UserDto secondUserDto = createSecondUserDto();
         secondUserDto = userService.addUser(secondUserDto);
 
-        UserDto thirdUserDto = createThirdUserDto();
         thirdUserDto = userService.addUser(thirdUserDto);
 
         List<UserDto> expectedList = new ArrayList<>();
@@ -211,10 +214,8 @@ public class UserServiceImplTests {
     @Order(value = 7)
     @DisplayName("7 - should throw exception for empty name.")
     void shouldThrowExceptionIfNameIsEmpty() {
-        UserDto firstUserDto = createFirstUserDto();
         final UserDto finalFirstUserDto = userService.addUser(firstUserDto);
 
-        UserDto secondUserDto = createSecondUserDto();
         secondUserDto.setName(null);
         Assertions.assertThrows(ValidationException.class, () -> userService.addUser(secondUserDto));
         secondUserDto.setName("");
@@ -223,26 +224,5 @@ public class UserServiceImplTests {
         finalFirstUserDto.setName("");
         Assertions.assertThrows(ValidationException.class,
                 () -> userService.updateUser(finalFirstUserDto.getId(), finalFirstUserDto));
-    }
-
-    private UserDto createFirstUserDto() {
-        return UserDto.builder()
-                .name("FirstUser")
-                .email("FirstUser@somemail.com")
-                .build();
-    }
-
-    private UserDto createSecondUserDto() {
-        return UserDto.builder()
-                .name("SecondUser")
-                .email("SecondUser@somemail.com")
-                .build();
-    }
-
-    private UserDto createThirdUserDto() {
-        return UserDto.builder()
-                .name("ThirdUser")
-                .email("ThirdUser@somemail.com")
-                .build();
     }
 }

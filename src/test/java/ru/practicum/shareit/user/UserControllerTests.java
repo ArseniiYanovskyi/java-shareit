@@ -31,9 +31,27 @@ public class UserControllerTests {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper mapper;
+    private UserDto firstUser;
+    private UserDto secondUser;
+    private UserDto thirdUser;
 
     @BeforeEach
     void beforeEach() {
+        firstUser = UserDto.builder()
+                .id(1)
+                .name("FirstUser")
+                .email("FirstUser@somemail.com")
+                .build();
+        secondUser = UserDto.builder()
+                .id(2)
+                .name("SecondUser")
+                .email("SecondUser@somemail.com")
+                .build();
+        thirdUser = UserDto.builder()
+                .id(3)
+                .name("ThirdUser")
+                .email("ThirdUser@somemail.com")
+                .build();
     }
 
     @AfterEach
@@ -44,8 +62,6 @@ public class UserControllerTests {
     @Order(value = 1)
     @DisplayName("1 - should add new users.")
     void shouldAddNewUsers() throws Exception {
-        UserDto firstUser = createFirstUserDto();
-        firstUser.setId(1);
         when(userService.addUser(firstUser))
                 .thenReturn(firstUser);
 
@@ -59,8 +75,6 @@ public class UserControllerTests {
                 .andExpect(jsonPath("$.name", is(firstUser.getName())))
                 .andExpect(jsonPath("$.email", is(firstUser.getEmail())));
 
-        UserDto secondUser = createSecondUserDto();
-        secondUser.setId(2);
         when(userService.addUser(secondUser))
                 .thenReturn(secondUser);
 
@@ -74,8 +88,6 @@ public class UserControllerTests {
                 .andExpect(jsonPath("$.name", is(secondUser.getName())))
                 .andExpect(jsonPath("$.email", is(secondUser.getEmail())));
 
-        UserDto thirdUser = createThirdUserDto();
-        thirdUser.setId(3);
         when(userService.addUser(thirdUser))
                 .thenReturn(thirdUser);
 
@@ -98,8 +110,6 @@ public class UserControllerTests {
     @Order(value = 2)
     @DisplayName("2 - should update users.")
     void shouldUpdateUsers() throws Exception {
-        UserDto firstUser = createFirstUserDto();
-        firstUser.setId(1);
         when(userService.updateUser(firstUser.getId(), firstUser))
                 .thenReturn(firstUser);
 
@@ -120,8 +130,6 @@ public class UserControllerTests {
     @Order(value = 3)
     @DisplayName("3 - should return user by id.")
     void shouldReturnUserById() throws Exception {
-        UserDto firstUser = createFirstUserDto();
-        firstUser.setId(1);
         when(userService.getUserDtoById(firstUser.getId()))
                 .thenReturn(firstUser);
 
@@ -139,12 +147,6 @@ public class UserControllerTests {
     @Order(value = 4)
     @DisplayName("4 - should return all users.")
     void shouldGetAllUsers() throws Exception {
-        UserDto firstUser = createFirstUserDto();
-        firstUser.setId(1);
-        UserDto secondUser = createSecondUserDto();
-        secondUser.setId(2);
-        UserDto thirdUser = createThirdUserDto();
-        thirdUser.setId(3);
         List<UserDto> users = new ArrayList<>();
         users.add(firstUser);
         users.add(secondUser);
@@ -167,26 +169,5 @@ public class UserControllerTests {
                 .andExpect(jsonPath("$[2].email", is(users.get(2).getEmail())));
 
         verify(userService, times(1)).getAllUsers();
-    }
-
-    private UserDto createFirstUserDto() {
-        return UserDto.builder()
-                .name("FirstUser")
-                .email("FirstUser@somemail.com")
-                .build();
-    }
-
-    private UserDto createSecondUserDto() {
-        return UserDto.builder()
-                .name("SecondUser")
-                .email("SecondUser@somemail.com")
-                .build();
-    }
-
-    private UserDto createThirdUserDto() {
-        return UserDto.builder()
-                .name("ThirdUser")
-                .email("ThirdUser@somemail.com")
-                .build();
     }
 }
