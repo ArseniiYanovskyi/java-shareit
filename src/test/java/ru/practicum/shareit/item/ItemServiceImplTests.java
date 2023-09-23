@@ -32,11 +32,11 @@ import static org.hamcrest.Matchers.equalTo;
 public class ItemServiceImplTests {
     private final EntityManager entityManager;
     @Autowired
+    UserServiceImpl userService;
+    @Autowired
     private ItemServiceImpl itemService;
     @Autowired
     private ItemRepository itemRepository;
-    @Autowired
-    UserServiceImpl userService;
     private ItemDto firstItemDto;
     private ItemDto secondItemDto;
     private ItemDto thirdItemDto;
