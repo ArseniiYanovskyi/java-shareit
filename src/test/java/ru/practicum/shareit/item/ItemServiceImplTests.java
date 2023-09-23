@@ -28,9 +28,9 @@ import static org.hamcrest.Matchers.equalTo;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ItemServiceImplTests {
     private final EntityManager entityManager;
+    private final ItemServiceImpl itemService;
     @Autowired
     UserServiceImpl userService;
-    private final ItemServiceImpl itemService;
     private ItemDto firstItemDto;
     private ItemDto secondItemDto;
     private ItemDto thirdItemDto;
@@ -44,24 +44,25 @@ public class ItemServiceImplTests {
         userService.addUser(UserMapper.convertToDto
                 (new User(3, "ThirdUserName", "ThirdUser@somemail.com")));
     }
+
     @BeforeEach
     void beforeEach() {
         firstItemDto = ItemDto.builder()
-                    .name("FirstItemName")
-                    .description("FirstItemDescription")
-                    .available(true)
-                    .build();
+                .name("FirstItemName")
+                .description("FirstItemDescription")
+                .available(true)
+                .build();
         secondItemDto = ItemDto.builder()
-                    .name("SecondItemName")
-                    .description("SecondItemDescription")
-                    .available(true)
-                    .build();
+                .name("SecondItemName")
+                .description("SecondItemDescription")
+                .available(true)
+                .build();
         thirdItemDto = ItemDto.builder()
-                    .name("ThirdItemName")
-                    .description("ThirdItemDescription")
-                    .available(true)
-                    .requestId(1)
-                    .build();
+                .name("ThirdItemName")
+                .description("ThirdItemDescription")
+                .available(true)
+                .requestId(1)
+                .build();
     }
 
     @AfterEach
@@ -166,6 +167,7 @@ public class ItemServiceImplTests {
         assertThat(result.getDescription(), equalTo(firstItemDto.getDescription()));
         assertThat(result.getIsAvailable(), equalTo(firstItemDto.getAvailable()));
     }
+
     @Test
     @Order(value = 5)
     @DisplayName("5 - should get all user's items.")

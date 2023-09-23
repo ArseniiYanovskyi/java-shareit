@@ -59,7 +59,6 @@ public class BookingControllerTests {
     }
 
 
-
     @AfterEach
     void afterEach() {
     }
@@ -101,7 +100,7 @@ public class BookingControllerTests {
                 .andExpect(jsonPath("$.booker.id", is(4)))
                 .andExpect(jsonPath("$.item.id", is(1)))
                 .andExpect(jsonPath("$.status", is(Status.APPROVED.toString())));
-        verify(bookingService, times(1)).setStatus(1,1, true);
+        verify(bookingService, times(1)).setStatus(1, 1, true);
 
 
         when(bookingService.setStatus(1, 1, false))
@@ -117,14 +116,14 @@ public class BookingControllerTests {
                 .andExpect(jsonPath("$.booker.id", is(4)))
                 .andExpect(jsonPath("$.item.id", is(1)))
                 .andExpect(jsonPath("$.status", is(Status.REJECTED.toString())));
-        verify(bookingService, times(1)).setStatus(1,1, false);
+        verify(bookingService, times(1)).setStatus(1, 1, false);
     }
 
     @Test
     @Order(value = 3)
     @DisplayName("3 - should get info about booking by id.")
     void shouldGetInfoAboutBookingById() throws Exception {
-        when(bookingService.getBookingInfo(1,1))
+        when(bookingService.getBookingInfo(1, 1))
                 .thenReturn(bookingDto);
 
         mockMvc.perform(get("/bookings/{bookingId}", 1)

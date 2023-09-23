@@ -21,7 +21,6 @@ public class ItemRequestServiceUtils {
 
     public ItemRequest checkAndConvertToRequest(long userId, ItemRequestDto itemRequestDto) {
         checkIsUserPresent(userId);
-        //checkItemRequestDescription(itemRequestDto);
         return ItemRequestMapper.convertToRequest(itemRequestDto, userId);
     }
 

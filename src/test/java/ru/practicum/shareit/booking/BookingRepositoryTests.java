@@ -45,6 +45,7 @@ public class BookingRepositoryTests {
     private Item fifthItem;
     private Booking firstBooking;
     private Booking secondBooking;
+
     @BeforeAll
     void beforeAll() {
         firstUser = userRepository.save(new User(1L, "FirstUser", "FirstUser@somemail.com"));
@@ -113,7 +114,7 @@ public class BookingRepositoryTests {
         List<Booking> result =
                 bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
                         (LocalDateTime.of(2024, 1, 4, 18, 15, 30),
-                         LocalDateTime.of(2024, 1, 7, 11, 50, 30),
+                                LocalDateTime.of(2024, 1, 7, 11, 50, 30),
                                 1);
 
         assertThat(expected.size(), equalTo(result.size()));
@@ -125,6 +126,7 @@ public class BookingRepositoryTests {
         assertThat(expected.get(0).getEnd(), equalTo(result.get(0).getEnd()));
         assertThat(expected.get(0).getStatus(), equalTo(result.get(0).getStatus()));
     }
+
     @Test
     @Order(value = 3)
     @DisplayName("3 - findAllByEndBeforeAndBooker_IdIsOrderByStartDesc.")
@@ -144,6 +146,7 @@ public class BookingRepositoryTests {
         assertThat(expected.get(0).getEnd(), equalTo(result.get(0).getEnd()));
         assertThat(expected.get(0).getStatus(), equalTo(result.get(0).getStatus()));
     }
+
     @Test
     @Order(value = 4)
     @DisplayName("4 -findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc")
@@ -163,6 +166,7 @@ public class BookingRepositoryTests {
         assertThat(expected.get(0).getEnd(), equalTo(result.get(0).getEnd()));
         assertThat(expected.get(0).getStatus(), equalTo(result.get(0).getStatus()));
     }
+
     @Test
     @Order(value = 5)
     @DisplayName("5 - findAllByStatusAndBooker_IdIsOrderByStartDesc")
@@ -182,6 +186,7 @@ public class BookingRepositoryTests {
         assertThat(expected.get(0).getEnd(), equalTo(result.get(0).getEnd()));
         assertThat(expected.get(0).getStatus(), equalTo(result.get(0).getStatus()));
     }
+
     @Test
     @Order(value = 6)
     @DisplayName("6 - findAllByItem_Owner_IdOrderByStartDesc.")
@@ -285,6 +290,7 @@ public class BookingRepositoryTests {
         assertThat(expected.get(0).getEnd(), equalTo(result.get(0).getEnd()));
         assertThat(expected.get(0).getStatus(), equalTo(result.get(0).getStatus()));
     }
+
     @Test
     @Order(value = 11)
     @DisplayName("11 - findFirstByItem_IdAndStartIsBeforeOrderByStartDesc.")
@@ -302,6 +308,7 @@ public class BookingRepositoryTests {
         assertThat(expected.getEnd(), equalTo(result.get().getEnd()));
         assertThat(expected.getStatus(), equalTo(result.get().getStatus()));
     }
+
     @Test
     @Order(value = 12)
     @DisplayName("12 - findFirstByItem_IdAndStartIsAfterAndStatusOrderByStartAsc.")

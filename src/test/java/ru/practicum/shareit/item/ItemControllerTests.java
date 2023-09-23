@@ -37,6 +37,7 @@ public class ItemControllerTests {
     private ItemDto firstItem;
     private ItemDto secondItem;
     private ItemDto thirdItem;
+
     @BeforeEach
     void beforeEach() {
         firstItem = ItemDto.builder()
@@ -177,7 +178,7 @@ public class ItemControllerTests {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        when(itemService.getItemDtoById(1,1))
+        when(itemService.getItemDtoById(1, 1))
                 .thenReturn(firstItem);
 
         mockMvc.perform(get("/items/{itemId}", 1)

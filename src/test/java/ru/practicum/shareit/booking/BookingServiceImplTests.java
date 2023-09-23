@@ -35,11 +35,11 @@ import static org.hamcrest.Matchers.equalTo;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BookingServiceImplTests {
     private final EntityManager entityManager;
+    private final BookingServiceImpl bookingService;
     @Autowired
     UserServiceImpl userService;
     @Autowired
     ItemServiceImpl itemService;
-    private final BookingServiceImpl bookingService;
     private UserDto firstUserDto;
     private UserDto secondUserDto;
     private ItemDto firstItemDto;
@@ -59,19 +59,19 @@ public class BookingServiceImplTests {
 
         firstItemDto = itemService.addItem(1, ItemMapper.convertToDto(
                 new Item(1, "FirstItemName", "FirstItemDescription",
-                true, firstUser, 0)));
+                        true, firstUser, 0)));
         secondItemDto = itemService.addItem(1, ItemMapper.convertToDto(
                 new Item(2, "SecondItemName", "SecondItemDescription",
-                true, firstUser, 0)));
+                        true, firstUser, 0)));
         thirdItemDto = itemService.addItem(1, ItemMapper.convertToDto(
                 new Item(3, "ThirdItemName", "ThirdItemDescription",
-                true, firstUser, 1)));
+                        true, firstUser, 1)));
         fourthItemDto = itemService.addItem(2, ItemMapper.convertToDto(
                 new Item(4, "FourthItemName", "FourthItemDescription",
-                true, secondUser, 1)));
+                        true, secondUser, 1)));
         fifthItemDto = itemService.addItem(2, ItemMapper.convertToDto(
                 new Item(5, "FifthItemName", "FifthItemDescription",
-                true, secondUser, 1)));
+                        true, secondUser, 1)));
     }
 
     @BeforeEach
@@ -96,9 +96,11 @@ public class BookingServiceImplTests {
         firstBookingDto = bookingService.createBooking(1, firstBookingDto);
         secondBookingDto = bookingService.createBooking(2, secondBookingDto);
     }
+
     @AfterEach
     void afterEach() {
     }
+
     @Test
     @Order(value = 1)
     @DisplayName("1 - should create booking.")
@@ -112,7 +114,7 @@ public class BookingServiceImplTests {
         assertThat(firstBooking.getId(), equalTo(firstBookingDto.getId()));
         assertThat(firstBooking.getBooker().getId(), equalTo(firstBookingDto.getBooker().getId()));
         assertThat(firstBooking.getItem().getId(), equalTo(firstBookingDto.getItem().getId()));
-        assertThat(firstBooking.getStatus().toString(), equalTo(firstBookingDto.getStatus().toString()));
+        assertThat(firstBooking.getStatus().toString(), equalTo(firstBookingDto.getStatus()));
     }
 
     @Test
@@ -139,6 +141,7 @@ public class BookingServiceImplTests {
         System.out.println("result = " + firstBookingRejected + " comparing to expected = " + firstBookingDto);
         assertThat(firstBookingRejected.getStatus().toString(), equalTo(Status.REJECTED.toString()));
     }
+
     @Test
     @Order(value = 3)
     @DisplayName("3 - should get booking info by Id.")
@@ -152,6 +155,7 @@ public class BookingServiceImplTests {
         assertThat(result.getItem().getId(), equalTo(firstBookingDto.getItem().getId()));
         assertThat(result.getStatus(), equalTo(firstBookingDto.getStatus()));
     }
+
     @Test
     @Order(value = 4)
     @DisplayName("4 - should get user bookings.")
@@ -166,6 +170,7 @@ public class BookingServiceImplTests {
         assertThat(result.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
         assertThat(result.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
     }
+
     @Test
     @Order(value = 5)
     @DisplayName("5 - should get user's item's bookings.")

@@ -30,20 +30,21 @@ public class UserServiceImplTests {
     private UserDto firstUserDto;
     private UserDto secondUserDto;
     private UserDto thirdUserDto;
+
     @BeforeEach
     void beforeEach() {
         firstUserDto = UserDto.builder()
-                    .name("FirstUser")
-                    .email("FirstUser@somemail.com")
-                    .build();
+                .name("FirstUser")
+                .email("FirstUser@somemail.com")
+                .build();
         secondUserDto = UserDto.builder()
-                    .name("SecondUser")
-                    .email("SecondUser@somemail.com")
-                    .build();
+                .name("SecondUser")
+                .email("SecondUser@somemail.com")
+                .build();
         thirdUserDto = UserDto.builder()
-                    .name("ThirdUser")
-                    .email("ThirdUser@somemail.com")
-                    .build();
+                .name("ThirdUser")
+                .email("ThirdUser@somemail.com")
+                .build();
     }
 
     @AfterEach
