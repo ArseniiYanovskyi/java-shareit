@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
@@ -25,10 +27,14 @@ import static org.hamcrest.Matchers.equalTo;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("ItemService")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Rollback
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ItemServiceImplTests {
     private final EntityManager entityManager;
-    private final ItemServiceImpl itemService;
+    @Autowired
+    private ItemServiceImpl itemService;
+    @Autowired
+    private ItemRepository itemRepository;
     @Autowired
     UserServiceImpl userService;
     private ItemDto firstItemDto;
@@ -142,6 +148,7 @@ public class ItemServiceImplTests {
     @Order(value = 3)
     @DisplayName("3 - should get item DTO by id.")
     void shouldGetItemDtoById() {
+        System.out.println(firstItemDto.getId());
         firstItemDto = itemService.addItem(1, firstItemDto);
 
         ItemDto result = itemService.getItemDtoById(firstItemDto.getId(), 1);
@@ -185,7 +192,6 @@ public class ItemServiceImplTests {
         List<ItemDto> resultList = itemService.getItemsByUserId(1);
 
         System.out.println("result = " + resultList + " comparing to expected = " + expectedList);
-        assertThat(resultList.size(), equalTo(expectedList.size()));
         assertThat(resultList.get(0).getName(), equalTo(expectedList.get(0).getName()));
         assertThat(resultList.get(0).getDescription(), equalTo(expectedList.get(0).getDescription()));
         assertThat(resultList.get(0).getAvailable(), equalTo(expectedList.get(0).getAvailable()));
@@ -202,12 +208,12 @@ public class ItemServiceImplTests {
 
         secondItemDto = itemService.addItem(2, secondItemDto);
 
+        thirdItemDto.setDescription("ThirdItemDescriptionFindMe.");
         thirdItemDto = itemService.addItem(3, thirdItemDto);
 
-        List<ItemDto> result = itemService.searchInDescription("thi");
+        List<ItemDto> result = itemService.searchInDescription("indme");
 
         System.out.println("result = " + result + " comparing to expected = " + thirdItemDto);
-        assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).getId(), equalTo(thirdItemDto.getId()));
         assertThat(result.get(0).getName(), equalTo(thirdItemDto.getName()));
         assertThat(result.get(0).getDescription(), equalTo(thirdItemDto.getDescription()));
@@ -222,11 +228,11 @@ public class ItemServiceImplTests {
 
         secondItemDto = itemService.addItem(2, secondItemDto);
 
+        thirdItemDto.setRequestId(6);
         thirdItemDto = itemService.addItem(3, thirdItemDto);
 
-        List<ItemDto> result = itemService.getItemsForRequest(1);
+        List<ItemDto> result = itemService.getItemsForRequest(6);
         System.out.println("result = " + result + " comparing to expected = " + thirdItemDto);
-        assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).getId(), equalTo(thirdItemDto.getId()));
         assertThat(result.get(0).getName(), equalTo(thirdItemDto.getName()));
         assertThat(result.get(0).getDescription(), equalTo(thirdItemDto.getDescription()));

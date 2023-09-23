@@ -3,9 +3,11 @@ package ru.practicum.shareit.user;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.Rollback;
 import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,8 @@ import static org.hamcrest.Matchers.equalTo;
 @DataJpaTest
 @DisplayName("UserRepository")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Rollback
+@Transactional
 public class UserRepositoryTests {
     @Autowired
     UserRepository userRepository;

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.dto.ItemRequestDto;
@@ -27,6 +28,7 @@ import static org.hamcrest.Matchers.equalTo;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DisplayName("ItemRequestService")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Rollback
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ItemRequestServiceTests {
     private final ItemRequestService itemRequestService;
@@ -126,7 +128,7 @@ public class ItemRequestServiceTests {
         TypedQuery<ItemRequest> itemRequestTypedQuery = entityManager.createQuery
                 ("Select i from ItemRequest i where i.id = :id", ItemRequest.class);
         ItemRequest itemRequest = itemRequestTypedQuery.setParameter
-                ("id", 1L).getSingleResult();
+                ("id", itemRequestDto.getId()).getSingleResult();
 
         System.out.println("result = " + itemRequest + " comparing to expected = " + itemRequestDto);
         assertThat(itemRequest.getId(), equalTo(itemRequestDto.getId()));
