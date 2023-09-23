@@ -25,7 +25,8 @@ import static org.hamcrest.Matchers.equalTo;
 @Rollback
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceImplTests {
-    private final EntityManager entityManager;
+    @Autowired
+    private EntityManager entityManager;
     @Autowired
     private UserServiceImpl userService;
     private UserDto firstUserDto;
