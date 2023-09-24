@@ -99,10 +99,6 @@ public class BookingServiceImplTests {
         secondBookingDto = bookingService.createBooking(2, secondBookingDto);
     }
 
-    @AfterEach
-    void afterEach() {
-    }
-
     @Test
     @Order(value = 1)
     @DisplayName("1 - should create booking.")

@@ -58,11 +58,6 @@ public class BookingControllerTests {
                 .build();
     }
 
-
-    @AfterEach
-    void afterEach() {
-    }
-
     @Test
     @Order(value = 1)
     @DisplayName("1 - should add new booking.")

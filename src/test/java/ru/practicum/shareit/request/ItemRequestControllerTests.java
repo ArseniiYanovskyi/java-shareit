@@ -37,7 +37,6 @@ public class ItemRequestControllerTests {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper mapper;
-
     private ItemRequestDto itemRequestDto;
 
     @BeforeEach
