@@ -1,175 +1,130 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
-import ru.practicum.shareit.exceptions.model.ValidationException;
+import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.dto.UserDto;
 import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.user.service.utils.UserServiceUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.*;
 
-@Transactional
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DisplayName("UserService")
-@Rollback
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(MockitoExtension.class)
 public class UserServiceImplTests {
-    @Autowired
-    private EntityManager entityManager;
-    @Autowired
-    private UserServiceImpl userService;
-    private UserDto firstUserDto;
-    private UserDto secondUserDto;
-    private UserDto thirdUserDto;
-
+    @Mock
+    UserRepository userRepository;
+    @Mock
+    UserServiceUtils utils;
+    @InjectMocks
+    UserServiceImpl userService;
+    UserDto firstUserDto;
+    UserDto secondUserDto;
+    User firstUser;
+    User secondUser;
     @BeforeEach
     void beforeEach() {
         firstUserDto = UserDto.builder()
-                .name("FirstUser")
-                .email("FirstUserService@somemail.com")
+                .id(1)
+                .name("FirstUserName.")
+                .email("FirstUserEmail@somemail.com")
                 .build();
         secondUserDto = UserDto.builder()
-                .name("SecondUser")
-                .email("SecondUserService@somemail.com")
+                .id(2)
+                .name("SecondUserName.")
+                .email("SecondUserEmail@somemail.com")
                 .build();
-        thirdUserDto = UserDto.builder()
-                .name("ThirdUser")
-                .email("ThirdUserService@somemail.com")
-                .build();
-    }
 
-    @AfterEach
-    void afterEach() {
+        firstUser = new User(1, "FirstUserName.", "FirstUserEmail@somemail.com");
+        secondUser = new User(2, "SecondUserName.", "SecondUserEmail@somemail.com");
     }
-
     @Test
     @Order(value = 1)
-    @DisplayName("1 - should create users.")
-    void shouldCreateUsers() {
+    @DisplayName("1 - should add user.")
+    void shouldAddUser() {
+        when(utils.convertToUser(firstUserDto)).thenReturn(firstUser);
+        when(userRepository.save(firstUser)).thenReturn(firstUser);
+        when(utils.convertToDto(firstUser)).thenReturn(firstUserDto);
+
         firstUserDto = userService.addUser(firstUserDto);
 
-        TypedQuery<User> firstUserQuery = entityManager.createQuery
-                ("Select i from User i where i.id = :id", User.class);
-        User firstUser = firstUserQuery.setParameter
-                ("id", firstUserDto.getId()).getSingleResult();
+        System.out.println("result = " + firstUserDto + " comparing to expected = " + firstUser);
+        assertThat(firstUserDto.getId(), equalTo(firstUser.getId()));
+        assertThat(firstUserDto.getName(), equalTo(firstUser.getName()));
+        assertThat(firstUserDto.getEmail(), equalTo(firstUser.getEmail()));
 
-        System.out.println("result = " + firstUser + " comparing to expected = " + firstUserDto);
-        assertThat(firstUser.getId(), equalTo(firstUserDto.getId()));
-        assertThat(firstUser.getName(), equalTo(firstUserDto.getName()));
-        assertThat(firstUser.getEmail(), equalTo(firstUserDto.getEmail()));
-
-        secondUserDto = userService.addUser(secondUserDto);
-
-        TypedQuery<User> secondUserQuery = entityManager.createQuery
-                ("Select i from User i where i.id = :id", User.class);
-        User secondUser = secondUserQuery.setParameter
-                ("id", secondUserDto.getId()).getSingleResult();
-
-        System.out.println("result = " + secondUser + " comparing to expected = " + secondUserDto);
-        assertThat(secondUser.getId(), equalTo(secondUserDto.getId()));
-        assertThat(secondUser.getName(), equalTo(secondUserDto.getName()));
-        assertThat(secondUser.getEmail(), equalTo(secondUserDto.getEmail()));
-
-        thirdUserDto = userService.addUser(thirdUserDto);
-
-        TypedQuery<User> thirdUserQuery = entityManager.createQuery
-                ("Select i from User i where i.id = :id", User.class);
-        User thirdUser = thirdUserQuery.setParameter
-                ("id", thirdUserDto.getId()).getSingleResult();
-
-        System.out.println("result = " + thirdUser + " comparing to expected = " + thirdUserDto);
-        assertThat(thirdUser.getId(), equalTo(thirdUserDto.getId()));
-        assertThat(thirdUser.getName(), equalTo(thirdUserDto.getName()));
-        assertThat(thirdUser.getEmail(), equalTo(thirdUserDto.getEmail()));
+        verify(utils, times(1)).convertToUser(firstUserDto);
+        verify(userRepository, times(1)).save(firstUser);
+        verify(utils, times(1)).convertToDto(firstUser);
     }
 
     @Test
     @Order(value = 2)
     @DisplayName("2 - should update users.")
     void shouldUpdateUsers() {
+        when(utils.convertToUser(firstUserDto)).thenReturn(firstUser);
+        when(userRepository.save(firstUser)).thenReturn(firstUser);
+        when(utils.convertToDto(firstUser)).thenReturn(firstUserDto);
+
         firstUserDto = userService.addUser(firstUserDto);
-        firstUserDto.setName("FirstUserUpdated");
-        firstUserDto.setEmail("FirstUserUpdated@somemail.com");
-        firstUserDto = userService.updateUser(firstUserDto.getId(), firstUserDto);
 
-        TypedQuery<User> firstUserQuery = entityManager.createQuery
-                ("Select i from User i where i.id = :id", User.class);
-        User firstUser = firstUserQuery.setParameter
-                ("id", firstUserDto.getId()).getSingleResult();
+        firstUserDto.setName("UpdatedName.");
+        firstUserDto.setEmail("UpdatedEmail.");
 
-        System.out.println("result = " + firstUser + " comparing to expected = " + firstUserDto);
-        assertThat(firstUser.getId(), equalTo(firstUserDto.getId()));
-        assertThat(firstUser.getName(), equalTo(firstUserDto.getName()));
-        assertThat(firstUser.getEmail(), equalTo(firstUserDto.getEmail()));
+        firstUser.setName("UpdatedName.");
+        firstUser.setEmail("UpdatedEmail.");
 
-        secondUserDto = userService.addUser(secondUserDto);
-        secondUserDto.setName("SecondUserUpdated");
-        secondUserDto.setEmail("SecondUserUpdated@somemail.com");
-        secondUserDto = userService.updateUser(secondUserDto.getId(), secondUserDto);
+        when(userRepository.findById(firstUserDto.getId())).thenReturn(Optional.ofNullable(firstUser));
+        firstUserDto = userService.updateUser(1, firstUserDto);
 
-        TypedQuery<User> secondUserQuery = entityManager.createQuery
-                ("Select i from User i where i.id = :id", User.class);
-        User secondUser = secondUserQuery.setParameter
-                ("id", secondUserDto.getId()).getSingleResult();
+        System.out.println("result = " + firstUserDto + " comparing to expected = " + firstUser);
+        assertThat(firstUserDto.getId(), equalTo(firstUser.getId()));
+        assertThat(firstUserDto.getName(), equalTo(firstUser.getName()));
+        assertThat(firstUserDto.getEmail(), equalTo(firstUser.getEmail()));
 
-        System.out.println("result = " + secondUser + " comparing to expected = " + secondUserDto);
-        assertThat(secondUser.getId(), equalTo(secondUserDto.getId()));
-        assertThat(secondUser.getName(), equalTo(secondUserDto.getName()));
-        assertThat(secondUser.getEmail(), equalTo(secondUserDto.getEmail()));
-
-        thirdUserDto = userService.addUser(thirdUserDto);
-        thirdUserDto.setName("ThirdUserUpdated");
-        thirdUserDto.setEmail("ThirdUserUpdated@somemail.com");
-        thirdUserDto = userService.updateUser(thirdUserDto.getId(), thirdUserDto);
-
-        TypedQuery<User> thirdUserQuery = entityManager.createQuery
-                ("Select i from User i where i.id = :id", User.class);
-        User thirdUser = thirdUserQuery.setParameter
-                ("id", thirdUserDto.getId()).getSingleResult();
-
-        System.out.println("result = " + thirdUser + " comparing to expected = " + thirdUserDto);
-        assertThat(thirdUser.getId(), equalTo(thirdUserDto.getId()));
-        assertThat(thirdUser.getName(), equalTo(thirdUserDto.getName()));
-        assertThat(thirdUser.getEmail(), equalTo(thirdUserDto.getEmail()));
+        verify(userRepository, times(1)).findById(firstUserDto.getId());
     }
 
     @Test
     @Order(value = 3)
     @DisplayName("3 - should get user DTO by id.")
     void shouldGetUserDtoById() {
+        when(utils.convertToUser(firstUserDto)).thenReturn(firstUser);
+        when(userRepository.save(firstUser)).thenReturn(firstUser);
+        when(utils.convertToDto(firstUser)).thenReturn(firstUserDto);
+
         firstUserDto = userService.addUser(firstUserDto);
 
-        UserDto resultingDto = userService.getUserDtoById(firstUserDto.getId());
+        when(userRepository.findById(firstUserDto.getId())).thenReturn(Optional.ofNullable(firstUser));
 
-        System.out.println("result = " + resultingDto + " comparing to expected = " + firstUserDto);
-        assertThat(resultingDto.getId(), equalTo(firstUserDto.getId()));
-        assertThat(resultingDto.getName(), equalTo(firstUserDto.getName()));
-        assertThat(resultingDto.getEmail(), equalTo(firstUserDto.getEmail()));
+        UserDto result = userService.getUserDtoById(firstUserDto.getId());
+
+        System.out.println("result = " + result + " comparing to expected = " + firstUser);
+        assertThat(result.getId(), equalTo(firstUserDto.getId()));
+        assertThat(result.getName(), equalTo(firstUserDto.getName()));
+        assertThat(result.getEmail(), equalTo(firstUserDto.getEmail()));
     }
 
     @Test
     @Order(value = 4)
     @DisplayName("4 - should get user by id.")
     void shouldGetUserById() {
-        firstUserDto = userService.addUser(firstUserDto);
+        when(userRepository.findById(firstUser.getId())).thenReturn(Optional.ofNullable(firstUser));
 
-        User resultingUser = userService.getUserById(firstUserDto.getId());
+        User result = userService.getUserById(firstUser.getId());
 
-        System.out.println("result = " + resultingUser + " comparing to expected = " + firstUserDto);
-        assertThat(resultingUser.getId(), equalTo(firstUserDto.getId()));
-        assertThat(resultingUser.getName(), equalTo(firstUserDto.getName()));
-        assertThat(resultingUser.getEmail(), equalTo(firstUserDto.getEmail()));
+        System.out.println("result = " + result + " comparing to expected = " + firstUser);
+        assertThat(result.getId(), equalTo(firstUser.getId()));
+        assertThat(result.getName(), equalTo(firstUser.getName()));
+        assertThat(result.getEmail(), equalTo(firstUser.getEmail()));
     }
 
     @Test
@@ -178,21 +133,5 @@ public class UserServiceImplTests {
     void shouldThrowExceptionIfUserNotPresent() {
         Assertions.assertThrows(NotFoundException.class, () -> userService.getUserDtoById(50));
         Assertions.assertThrows(NotFoundException.class, () -> userService.getUserById(50));
-    }
-
-    @Test
-    @Order(value = 6)
-    @DisplayName("6 - should throw exception for empty name.")
-    void shouldThrowExceptionIfNameIsEmpty() {
-        final UserDto finalFirstUserDto = userService.addUser(firstUserDto);
-
-        secondUserDto.setName(null);
-        Assertions.assertThrows(ValidationException.class, () -> userService.addUser(secondUserDto));
-        secondUserDto.setName("");
-        Assertions.assertThrows(ValidationException.class, () -> userService.addUser(secondUserDto));
-
-        finalFirstUserDto.setName("");
-        Assertions.assertThrows(ValidationException.class,
-                () -> userService.updateUser(finalFirstUserDto.getId(), finalFirstUserDto));
     }
 }

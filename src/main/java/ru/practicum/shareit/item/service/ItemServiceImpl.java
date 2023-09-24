@@ -44,12 +44,13 @@ public class ItemServiceImpl implements ItemService {
         utils.checkItemDtoValidation(itemDto);
         utils.checkIsItemAvailable(itemDto);
 
-        User owner = UserMapper.convertToUser(userService.getUserDtoById(userId));
-
+        User owner = userService.getUserById(userId);
+        System.out.println(owner);
         Item item = utils.convertToItem(itemDto, owner);
+        System.out.println(item);
 
         log.debug("Sending to DAO item to create with name {} and description {} from user {}.",
-                item.getName(), item.getDescription(), userId);
+                itemDto.getName(), itemDto.getDescription(), userId);
 
         return utils.convertToDto(itemRepository.save(item));
     }

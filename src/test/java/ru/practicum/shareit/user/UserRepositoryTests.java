@@ -14,11 +14,11 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+@Transactional
+@Rollback
 @DataJpaTest
 @DisplayName("UserRepository")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Rollback
-@Transactional
 public class UserRepositoryTests {
     @Autowired
     UserRepository userRepository;
