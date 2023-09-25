@@ -89,15 +89,13 @@ public class ItemRequestServiceTests {
         long userId = 1;
         itemRequestDto = itemRequestService.addNewRequest(userId, itemRequestDto);
 
-        TypedQuery<ItemRequest> itemRequestTypedQuery = entityManager.createQuery
-                ("Select i from ItemRequest i where i.publisher = :publisher", ItemRequest.class);
-        ItemRequest itemRequest = itemRequestTypedQuery.setParameter
-                ("publisher", userId).getSingleResult();
+        List<ItemRequestDto> itemRequest = itemRequestService.getUserRequests(userId);
+
+        assertThat(itemRequest.size(), equalTo(1));
 
         System.out.println("result = " + itemRequest + " comparing to expected = " + itemRequestDto);
-        assertThat(itemRequest.getId(), equalTo(itemRequestDto.getId()));
-        assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
-        assertThat(itemRequest.getPublisher(), equalTo(userId));
+        assertThat(itemRequest.get(0).getId(), equalTo(itemRequestDto.getId()));
+        assertThat(itemRequest.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
     }
 
     @Test
@@ -109,30 +107,38 @@ public class ItemRequestServiceTests {
 
         TypedQuery<ItemRequest> itemRequestTypedQuery = entityManager.createQuery
                 ("Select i from ItemRequest i where i.publisher != :publisher", ItemRequest.class);
-        List<ItemRequest> itemRequest = itemRequestTypedQuery.setParameter
-                ("publisher", userId).getResultList();
+        List<ItemRequestDto> itemRequest = itemRequestService.getOtherUsersRequests(userId);
 
         System.out.println("result = " + itemRequest + " comparing to expected = " + itemRequestDto);
         assertThat(itemRequest.get(0).getId(), equalTo(itemRequestDto.getId()));
         assertThat(itemRequest.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
-        assertThat(itemRequest.get(0).getPublisher(), equalTo(1L));
     }
 
     @Test
     @Order(value = 4)
-    @DisplayName("4 - get request by id.")
+    @DisplayName("4 - get other users requests pagination.")
+    void shouldGetOtherUsersRequestsPagination() {
+        long userId = 5;
+        itemRequestDto = itemRequestService.addNewRequest(1L, itemRequestDto);
+
+        List<ItemRequestDto> itemRequest = itemRequestService.getOtherUsersRequestsPagination(userId, 1, 10);
+
+        System.out.println("result = " + itemRequest + " comparing to expected = " + itemRequestDto);
+        assertThat(itemRequest.get(0).getId(), equalTo(itemRequestDto.getId()));
+        assertThat(itemRequest.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
+    }
+
+    @Test
+    @Order(value = 5)
+    @DisplayName("5 - get request by id.")
     void shouldGetRequestById() {
         long userId = 1;
         itemRequestDto = itemRequestService.addNewRequest(userId, itemRequestDto);
 
-        TypedQuery<ItemRequest> itemRequestTypedQuery = entityManager.createQuery
-                ("Select i from ItemRequest i where i.id = :id", ItemRequest.class);
-        ItemRequest itemRequest = itemRequestTypedQuery.setParameter
-                ("id", itemRequestDto.getId()).getSingleResult();
+        ItemRequestDto itemRequest = itemRequestService.getRequest(userId, itemRequestDto.getId());
 
         System.out.println("result = " + itemRequest + " comparing to expected = " + itemRequestDto);
         assertThat(itemRequest.getId(), equalTo(itemRequestDto.getId()));
         assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
-        assertThat(itemRequest.getPublisher(), equalTo(userId));
     }
 }

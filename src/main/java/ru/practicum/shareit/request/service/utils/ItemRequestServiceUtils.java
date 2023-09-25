@@ -25,7 +25,7 @@ public class ItemRequestServiceUtils {
     }
 
     public ItemRequestDto convertToDto(ItemRequest itemRequest) {
-        List<ItemDto> items = getRequestAnswers(itemRequest.getId());
+        List<ItemDto> items = itemService.getItemsForRequest(itemRequest.getId());
         if (items == null || items.size() < 1) {
             items = new ArrayList<>();
         }
@@ -34,16 +34,5 @@ public class ItemRequestServiceUtils {
 
     public void checkIsUserPresent(long userId) {
         userService.checkIsUserPresent(userId);
-    }
-
-    private List<ItemDto> getRequestAnswers(long requestId) {
-        return itemService.getItemsForRequest(requestId);
-    }
-
-    private void checkItemRequestDescription(ItemRequestDto itemRequestDto) {
-        if (itemRequestDto.getDescription() == null
-                || itemRequestDto.getDescription().isBlank()) {
-            throw new ValidationException("Request description can not be empty.");
-        }
     }
 }

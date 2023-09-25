@@ -1,11 +1,11 @@
 package ru.practicum.shareit.item;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dao.UserRepository;
@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @DataJpaTest
 @DisplayName("ItemRepository")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ItemRepositoryTests {
     @Autowired
     UserRepository userRepository;
@@ -122,5 +123,66 @@ public class ItemRepositoryTests {
         assertThat(expectingResult.get(2).getIsAvailable(), equalTo(actualResult.get(2).getIsAvailable()));
         assertThat(expectingResult.get(2).getOwner().getId(), equalTo(actualResult.get(2).getOwner().getId()));
         assertThat(expectingResult.get(2).getRequest(), equalTo(actualResult.get(2).getRequest()));
+    }
+
+    @Test
+    @Order(value = 4)
+    @DisplayName("4 - find by owner id pagination.")
+    void shouldFindByOwnerIdPagination() {
+        List<Item> expectingResult = new ArrayList<>();
+        expectingResult.add(fourthItem);
+        expectingResult.add(fifthItem);
+        final PageImpl<Item> expectingResultPage = new PageImpl<>(expectingResult);
+
+        Page<Item> actualResults = itemRepository.findAllByOwner_IdOrderByIdAsc
+                (secondUser.getId(), PageRequest.ofSize(10));
+
+        assertThat(expectingResultPage.getTotalElements(), equalTo(actualResults.getTotalElements()));
+
+        Item expectingFirstItem = actualResults.stream()
+                .filter(item -> item.getId() == expectingResult.get(0).getId())
+                .findFirst()
+                .get();
+        Item exceptingSecondItem = actualResults.stream()
+                .filter(item -> item.getId() == expectingResult.get(1).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expectingResult.get(0).getName(), equalTo(expectingFirstItem.getName()));
+        assertThat(expectingResult.get(0).getDescription(), equalTo(expectingFirstItem.getDescription()));
+        assertThat(expectingResult.get(0).getIsAvailable(), equalTo(expectingFirstItem.getIsAvailable()));
+        assertThat(expectingResult.get(0).getOwner().getId(), equalTo(expectingFirstItem.getOwner().getId()));
+        assertThat(expectingResult.get(0).getRequest(), equalTo(expectingFirstItem.getRequest()));
+
+        assertThat(expectingResult.get(1).getName(), equalTo(exceptingSecondItem.getName()));
+        assertThat(expectingResult.get(1).getDescription(), equalTo(exceptingSecondItem.getDescription()));
+        assertThat(expectingResult.get(1).getIsAvailable(), equalTo(exceptingSecondItem.getIsAvailable()));
+        assertThat(expectingResult.get(1).getOwner().getId(), equalTo(exceptingSecondItem.getOwner().getId()));
+        assertThat(expectingResult.get(1).getRequest(), equalTo(exceptingSecondItem.getRequest()));
+    }
+
+    @Test
+    @Order(value = 5)
+    @DisplayName("5 - should find by description pagination.")
+    void shouldFindByDescriptionPagination() {
+        List<Item> expectingResult = new ArrayList<>();
+        expectingResult.add(fifthItem);
+        final PageImpl<Item> expectingResultPage = new PageImpl<>(expectingResult);
+
+        Page<Item> actualResult = itemRepository.findAllByDescriptionContainsIgnoreCase
+                ("fift", PageRequest.ofSize(10));
+
+        assertThat(expectingResultPage.getTotalElements(), equalTo(actualResult.getTotalElements()));
+
+        Item expectingFirstItem = actualResult.stream()
+                .filter(item -> item.getId() == expectingResult.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expectingResult.get(0).getName(), equalTo(expectingFirstItem.getName()));
+        assertThat(expectingResult.get(0).getDescription(), equalTo(expectingFirstItem.getDescription()));
+        assertThat(expectingResult.get(0).getIsAvailable(), equalTo(expectingFirstItem.getIsAvailable()));
+        assertThat(expectingResult.get(0).getOwner().getId(), equalTo(expectingFirstItem.getOwner().getId()));
+        assertThat(expectingResult.get(0).getRequest(), equalTo(expectingFirstItem.getRequest()));
     }
 }

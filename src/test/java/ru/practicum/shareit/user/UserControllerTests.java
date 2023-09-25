@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("UserController")
 @WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserControllerTests {
     @MockBean
     private UserService userService;
@@ -165,5 +166,15 @@ public class UserControllerTests {
                 .andExpect(jsonPath("$[2].email", is(users.get(2).getEmail())));
 
         verify(userService, times(1)).getAllUsers();
+    }
+
+    @Test
+    @Order(value = 5)
+    @DisplayName("5 - should delete user.")
+    void shouldDeleteUser() throws Exception {
+        mockMvc.perform(delete("/users/{userId}", 1))
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).deleteUser(1);
     }
 }

@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 @Transactional
 @Rollback
 @DataJpaTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("UserRepository")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserRepositoryTests {

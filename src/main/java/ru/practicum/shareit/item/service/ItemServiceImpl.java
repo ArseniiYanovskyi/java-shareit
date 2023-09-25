@@ -37,7 +37,6 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final ItemServiceUtils utils;
-
     @Override
     @Transactional
     public ItemDto addItem(long userId, ItemDto itemDto) {
@@ -54,7 +53,6 @@ public class ItemServiceImpl implements ItemService {
 
         return utils.convertToDto(itemRepository.save(item));
     }
-
     @Override
     @Transactional
     public ItemDto updateItem(long userId, ItemDto itemDto) {
@@ -82,7 +80,6 @@ public class ItemServiceImpl implements ItemService {
 
         return getItemDtoById(itemId, userId);
     }
-
     @Override
     @Transactional
     public ItemDto getItemDtoById(long itemId, long userId) {
@@ -106,7 +103,6 @@ public class ItemServiceImpl implements ItemService {
 
         return itemDto;
     }
-
     @Override
     @Transactional
     public Item getItemById(long itemId) {
@@ -114,7 +110,6 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
-
     @Override
     @Transactional
     public List<ItemDto> getItemsByUserId(long userId) {
@@ -147,7 +142,6 @@ public class ItemServiceImpl implements ItemService {
                 })
                 .collect(Collectors.toList());
     }
-
     @Override
     @Transactional
     public List<ItemDto> getItemsByUserIdPagination(long userId, int from, int size) {
@@ -186,7 +180,6 @@ public class ItemServiceImpl implements ItemService {
                 })
                 .collect(Collectors.toList());
     }
-
     @Override
     @Transactional
     public List<ItemDto> searchInDescription(String text) {
@@ -201,7 +194,6 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::convertToDto)
                 .collect(Collectors.toList());
     }
-
     @Override
     @Transactional
     public List<ItemDto> searchInDescriptionPagination(String text, int from, int size) {
@@ -223,7 +215,6 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::convertToDto)
                 .collect(Collectors.toList());
     }
-
     @Override
     @Transactional
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
@@ -234,15 +225,6 @@ public class ItemServiceImpl implements ItemService {
 
         return utils.convertToDto(commentRepository.save(comment));
     }
-
-    @Override
-    @Transactional
-    public void deleteUserItems(long userId) {
-        //проверка наличия пользователя отсутствует потому что метод вызывается после удаления пользователя
-        log.debug("Sending to DAO request to delete user id {} items.", userId);
-        itemRepository.deleteById(userId);
-    }
-
     @Override
     @Transactional
     public List<ItemDto> getItemsForRequest(long requestId) {

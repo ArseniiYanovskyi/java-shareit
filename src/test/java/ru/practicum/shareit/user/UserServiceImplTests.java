@@ -12,6 +12,8 @@ import ru.practicum.shareit.user.model.dto.UserDto;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 import ru.practicum.shareit.user.service.utils.UserServiceUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,6 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceImplTests {
     @Mock
     UserRepository userRepository;
@@ -30,6 +33,7 @@ public class UserServiceImplTests {
     UserDto secondUserDto;
     User firstUser;
     User secondUser;
+
     @BeforeEach
     void beforeEach() {
         firstUserDto = UserDto.builder()
@@ -46,6 +50,7 @@ public class UserServiceImplTests {
         firstUser = new User(1, "FirstUserName.", "FirstUserEmail@somemail.com");
         secondUser = new User(2, "SecondUserName.", "SecondUserEmail@somemail.com");
     }
+
     @Test
     @Order(value = 1)
     @DisplayName("1 - should add user.")
@@ -80,7 +85,6 @@ public class UserServiceImplTests {
         firstUserDto.setEmail("UpdatedEmail.");
 
         firstUser.setName("UpdatedName.");
-        firstUser.setEmail("UpdatedEmail.");
 
         when(userRepository.findById(firstUserDto.getId())).thenReturn(Optional.ofNullable(firstUser));
         firstUserDto = userService.updateUser(1, firstUserDto);
@@ -133,5 +137,36 @@ public class UserServiceImplTests {
     void shouldThrowExceptionIfUserNotPresent() {
         Assertions.assertThrows(NotFoundException.class, () -> userService.getUserDtoById(50));
         Assertions.assertThrows(NotFoundException.class, () -> userService.getUserById(50));
+    }
+
+    @Test
+    @Order(value = 6)
+    @DisplayName("6 - should throw exception if user not present.")
+    void shouldGetAllUsers() {
+        List<User> expecting = new ArrayList<>();
+        expecting.add(firstUser);
+        expecting.add(secondUser);
+        when(userRepository.findAll()).thenReturn(expecting);
+        when(utils.convertToDto(firstUser)).thenReturn(firstUserDto);
+        when(utils.convertToDto(secondUser)).thenReturn(secondUserDto);
+
+        List<UserDto> result = userService.getAllUsers();
+
+        System.out.println("result = " + result + " comparing to expected = " + firstUserDto + secondUserDto);
+        assertThat(result.get(0).getId(), equalTo(firstUserDto.getId()));
+        assertThat(result.get(0).getName(), equalTo(firstUserDto.getName()));
+        assertThat(result.get(0).getEmail(), equalTo(firstUserDto.getEmail()));
+
+        assertThat(result.get(1).getId(), equalTo(secondUserDto.getId()));
+        assertThat(result.get(1).getName(), equalTo(secondUserDto.getName()));
+        assertThat(result.get(1).getEmail(), equalTo(secondUserDto.getEmail()));
+    }
+
+    @Test
+    @Order(value = 7)
+    @DisplayName("7 - should throw exception if user not present.")
+    void shouldDeleteUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(firstUser));
+        userService.deleteUser(1);
     }
 }

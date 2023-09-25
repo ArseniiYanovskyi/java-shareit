@@ -1,13 +1,14 @@
 package ru.practicum.shareit.item;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.Comment.CommentRepository;
 import ru.practicum.shareit.item.Comment.model.Comment;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("ItemService")
 public class ItemServiceImplTests {
 
@@ -232,8 +234,39 @@ public class ItemServiceImplTests {
     }
 
     @Test
-    @Order(value = 5)
-    @DisplayName("5 - should search in description.")
+    @Order(value = 6)
+    @DisplayName("6 - should get all user's items pagination.")
+    void shouldGetAllUserItemsPagination() {
+        List<Item> correctResult = new ArrayList<>();
+        correctResult.add(firstItem);
+        correctResult.add(secondItem);
+        when(itemRepository.findAllByOwner_IdOrderByIdAsc(firstUserDto.getId(), PageRequest.of(1 / 10, 10)))
+                .thenReturn(new PageImpl<>(correctResult));
+        when(bookingService.getLastBookingForItem(anyLong())).thenReturn(null);
+        when(bookingService.getNextBookingForItem(anyLong())).thenReturn(null);
+        when(commentRepository.findAllByItem_IdOrderByIdDesc(anyLong())).thenReturn(new ArrayList<>());
+
+        List<ItemDto> result = itemService.getItemsByUserIdPagination(firstUserDto.getId(), 1, 10);
+
+        System.out.println("result = " + result + " comparing to expected = " + correctResult);
+        assertThat(result.size(), equalTo(correctResult.size()));
+
+        assertThat(result.get(0).getId(), equalTo(correctResult.get(0).getId()));
+        assertThat(result.get(0).getName(), equalTo(correctResult.get(0).getName()));
+        assertThat(result.get(0).getDescription(), equalTo(correctResult.get(0).getDescription()));
+        assertThat(result.get(0).getAvailable(), equalTo(correctResult.get(0).getIsAvailable()));
+        assertThat(result.get(0).getRequestId(), equalTo(correctResult.get(0).getRequest()));
+
+        assertThat(result.get(1).getId(), equalTo(correctResult.get(1).getId()));
+        assertThat(result.get(1).getName(), equalTo(correctResult.get(1).getName()));
+        assertThat(result.get(1).getDescription(), equalTo(correctResult.get(1).getDescription()));
+        assertThat(result.get(1).getAvailable(), equalTo(correctResult.get(1).getIsAvailable()));
+        assertThat(result.get(1).getRequestId(), equalTo(correctResult.get(1).getRequest()));
+    }
+
+    @Test
+    @Order(value = 7)
+    @DisplayName("7 - should search in description.")
     void shouldSearchInDescription() {
         List<Item> correctResult = new ArrayList<>();
         correctResult.add(secondItem);
@@ -253,8 +286,29 @@ public class ItemServiceImplTests {
     }
 
     @Test
-    @Order(value = 6)
-    @DisplayName("6 - should get items by request.")
+    @Order(value = 8)
+    @DisplayName("8 - should search in description pagination.")
+    void shouldSearchInDescriptionPagination() {
+        List<Item> correctResult = new ArrayList<>();
+        correctResult.add(secondItem);
+        when(itemRepository.findAllByDescriptionContainsIgnoreCase(("cond"), PageRequest.of(1 / 10, 10)))
+                .thenReturn(new PageImpl<>(correctResult));
+
+        List<ItemDto> result = itemService.searchInDescriptionPagination("cond", 1, 10);
+
+        System.out.println("result = " + result + " comparing to expected = " + correctResult);
+        assertThat(result.size(), equalTo(correctResult.size()));
+
+        assertThat(result.get(0).getId(), equalTo(correctResult.get(0).getId()));
+        assertThat(result.get(0).getName(), equalTo(correctResult.get(0).getName()));
+        assertThat(result.get(0).getDescription(), equalTo(correctResult.get(0).getDescription()));
+        assertThat(result.get(0).getAvailable(), equalTo(correctResult.get(0).getIsAvailable()));
+        assertThat(result.get(0).getRequestId(), equalTo(correctResult.get(0).getRequest()));
+    }
+
+    @Test
+    @Order(value = 9)
+    @DisplayName("9 - should get items by request.")
     void shouldGetItemsByRequest() {
         secondItem.setRequest(9);
         List<Item> correctResult = new ArrayList<>();
@@ -275,7 +329,8 @@ public class ItemServiceImplTests {
     }
 
     @Test
-    @DisplayName("7 - shoud add comment.")
+    @Order(value = 10)
+    @DisplayName("10 - should add comment.")
     void shouldAddComment() {
         CommentDto firstCommentDto = CommentDto.builder()
                 .id(1)
@@ -299,5 +354,68 @@ public class ItemServiceImplTests {
         assertThat(result.getText(), equalTo(firstCommentDto.getText()));
         assertThat(result.getItemName(), equalTo(firstCommentDto.getItemName()));
         assertThat(result.getAuthorName(), equalTo(firstCommentDto.getAuthorName()));
+    }
+
+    @Test
+    @Order(value = 11)
+    @DisplayName("11 - comments and bookings.")
+    void shouldReturnWithCommentsAndBookings() {
+        Comment firstComment = new Comment(1, "first comment text.",
+                firstItem, firstUser, LocalDateTime.now());
+        Comment secondComment = new Comment(2, "second comment text.",
+                firstItem, firstUser, LocalDateTime.now());
+        List<Comment> comments = new ArrayList<>();
+        comments.add(firstComment);
+        comments.add(secondComment);
+
+        Booking expectingLastBooking = new Booking();
+        expectingLastBooking.setId(1);
+        expectingLastBooking.setBooker(firstUser);
+        expectingLastBooking.setItem(firstItem);
+        expectingLastBooking.setStart(LocalDateTime.of(2019, 1, 2, 18, 15, 30));
+        expectingLastBooking.setEnd(LocalDateTime.of(2020, 1, 10, 11, 50, 30));
+        expectingLastBooking.setStatus(Status.APPROVED);
+
+        Booking expectingNextBooking = new Booking();
+        expectingNextBooking.setId(2);
+        expectingNextBooking.setBooker(firstUser);
+        expectingNextBooking.setItem(firstItem);
+        expectingNextBooking.setStart(LocalDateTime.of(2024, 2, 3, 19, 16, 40));
+        expectingNextBooking.setEnd(LocalDateTime.of(2024, 2, 13, 10, 30, 20));
+        expectingNextBooking.setStatus(Status.WAITING);
+
+
+        when(utils.convertToDto(firstItem)).thenReturn(firstItemDto);
+        when(itemRepository.findById(firstItemDto.getId())).thenReturn(Optional.ofNullable(firstItem));
+        when(bookingService.getLastBookingForItem(anyLong())).thenReturn(expectingLastBooking);
+        when(bookingService.getNextBookingForItem(anyLong())).thenReturn(expectingNextBooking);
+        when(commentRepository.findAllByItem_IdOrderByIdDesc(anyLong())).thenReturn(comments);
+
+        ItemDto result = itemService.getItemDtoById(firstUserDto.getId(), firstItemDto.getId());
+
+        System.out.println("result = " + result + " comparing to expected = " + firstItemDto);
+        assertThat(result.getId(), equalTo(firstItemDto.getId()));
+        assertThat(result.getName(), equalTo(firstItemDto.getName()));
+        assertThat(result.getDescription(), equalTo(firstItemDto.getDescription()));
+        assertThat(result.getAvailable(), equalTo(firstItemDto.getAvailable()));
+        assertThat(result.getRequestId(), equalTo(firstItemDto.getRequestId()));
+
+        assertThat(result.getComments().size(), equalTo(comments.size()));
+
+        assertThat(result.getComments().get(0).getText(), equalTo(comments.get(0).getText()));
+        assertThat(result.getComments().get(0).getItemName(), equalTo(comments.get(0).getItem().getName()));
+        assertThat(result.getComments().get(0).getAuthorName(), equalTo(comments.get(0).getAuthor().getName()));
+        assertThat(result.getComments().get(0).getId(), equalTo(comments.get(0).getId()));
+
+        assertThat(result.getComments().get(1).getText(), equalTo(comments.get(1).getText()));
+        assertThat(result.getComments().get(1).getItemName(), equalTo(comments.get(1).getItem().getName()));
+        assertThat(result.getComments().get(1).getAuthorName(), equalTo(comments.get(1).getAuthor().getName()));
+        assertThat(result.getComments().get(1).getId(), equalTo(comments.get(1).getId()));
+
+        assertThat(result.getLastBooking().getBookerId(), equalTo(expectingLastBooking.getBooker().getId()));
+        assertThat(result.getLastBooking().getId(), equalTo(expectingLastBooking.getId()));
+
+        assertThat(result.getNextBooking().getBookerId(), equalTo(expectingNextBooking.getBooker().getId()));
+        assertThat(result.getNextBooking().getId(), equalTo(expectingNextBooking.getId()));
     }
 }

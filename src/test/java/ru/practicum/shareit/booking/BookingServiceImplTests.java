@@ -5,6 +5,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import ru.practicum.shareit.booking.dao.BookingRepository;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.model.dto.BookingDto;
@@ -22,6 +24,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,6 +41,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class BookingServiceImplTests {
     private final EntityManager entityManager;
     private final BookingServiceImpl bookingService;
+    private final BookingRepository bookingRepository;
     @Autowired
     UserServiceImpl userService;
     @Autowired
@@ -160,18 +164,199 @@ public class BookingServiceImplTests {
     void shouldGetUserBookings() {
         List<BookingDto> expected = Collections.singletonList(firstBookingDto);
 
-        List<BookingDto> result = bookingService.getUsersBookings(1, "ALL");
+        List<BookingDto> resultForAll = bookingService.getUsersBookings(1, "ALL");
 
-        System.out.println("result = " + result + " comparing to expected = " + expected);
-        assertThat(result.get(0).getId(), equalTo(expected.get(0).getId()));
-        assertThat(result.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
-        assertThat(result.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
-        assertThat(result.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+        System.out.println("result = " + resultForAll + " comparing to expected = " + expected);
+        assertThat(resultForAll.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForAll.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForAll.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForAll.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForCurrent = new Booking();
+        bookingForCurrent.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForCurrent.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForCurrent.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForCurrent.setEnd(LocalDateTime.of(2024, 2, 13, 10, 30, 20));
+        bookingForCurrent.setStatus(Status.APPROVED);
+        bookingForCurrent.setId(bookingRepository.save(bookingForCurrent).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForCurrent));
+
+        List<BookingDto> resultForCurrent = bookingService.getUsersBookings(1, "CURRENT");
+
+        System.out.println("result = " + resultForCurrent + " comparing to expected = " + expected);
+        assertThat(resultForCurrent.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForCurrent.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForCurrent.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForCurrent.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForPast = new Booking();
+        bookingForPast.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForPast.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForPast.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForPast.setEnd(LocalDateTime.of(2020, 2, 13, 10, 30, 20));
+        bookingForPast.setStatus(Status.APPROVED);
+        bookingForPast.setId(bookingRepository.save(bookingForPast).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForPast));
+
+        List<BookingDto> resultForPast = bookingService.getUsersBookings(1, "PAST");
+
+        System.out.println("result = " + resultForPast + " comparing to expected = " + expected);
+        assertThat(resultForPast.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForPast.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForPast.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForPast.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForFuture = new Booking();
+        bookingForFuture.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForFuture.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForFuture.setStart(LocalDateTime.of(2023, 12, 3, 19, 16, 40));
+        bookingForFuture.setEnd(LocalDateTime.of(2023, 12, 13, 10, 30, 20));
+        bookingForFuture.setStatus(Status.APPROVED);
+        bookingForFuture.setId(bookingRepository.save(bookingForFuture).getId());
+        expected = new ArrayList<>();
+        expected.add(firstBookingDto);
+        expected.add(BookingMapper.convertToDto(bookingForFuture));
+
+        List<BookingDto> resultForFuture = bookingService.getUsersBookings(1, "FUTURE");
+
+        System.out.println("result = " + resultForFuture + " comparing to expected = " + expected);
+        assertThat(resultForFuture.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForFuture.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForFuture.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForFuture.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+        assertThat(resultForFuture.get(1).getId(), equalTo(expected.get(1).getId()));
+        assertThat(resultForFuture.get(1).getBooker().getId(), equalTo(expected.get(1).getBooker().getId()));
+        assertThat(resultForFuture.get(1).getItem().getId(), equalTo(expected.get(1).getItem().getId()));
+        assertThat(resultForFuture.get(1).getStatus(), equalTo(expected.get(1).getStatus()));
+
+        expected.remove(1);
+        List<BookingDto> resultForWaiting = bookingService.getUsersBookings(1, "WAITING");
+        System.out.println("result = " + resultForWaiting + " comparing to expected = " + expected);
+        assertThat(resultForWaiting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForWaiting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForWaiting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForWaiting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking BookingForRejected = new Booking();
+        BookingForRejected.setBooker(UserMapper.convertToUser(firstUserDto));
+        BookingForRejected.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        BookingForRejected.setStart(LocalDateTime.of(2020, 12, 3, 19, 16, 40));
+        BookingForRejected.setEnd(LocalDateTime.of(2027, 12, 13, 10, 30, 20));
+        BookingForRejected.setStatus(Status.REJECTED);
+        BookingForRejected.setId(bookingRepository.save(BookingForRejected).getId());
+        expected = new ArrayList<>();
+        expected.add(BookingMapper.convertToDto(BookingForRejected));
+
+        List<BookingDto> resultForRejecting = bookingService.getUsersBookings(1, "REJECTED");
+
+        System.out.println("result = " + resultForRejecting + " comparing to expected = " + expected);
+        assertThat(resultForRejecting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForRejecting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForRejecting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForRejecting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
     }
 
     @Test
     @Order(value = 5)
-    @DisplayName("5 - should get user's item's bookings.")
+    @DisplayName("5 - should get user bookings pagination.")
+    void shouldGetUserBookingsPagination() {
+        List<BookingDto> expected = Collections.singletonList(firstBookingDto);
+
+        List<BookingDto> resultForAll = bookingService.getUsersBookingsPagination(1, "ALL", 1, 10);
+
+        System.out.println("result = " + resultForAll + " comparing to expected = " + expected);
+        assertThat(resultForAll.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForAll.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForAll.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForAll.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForCurrent = new Booking();
+        bookingForCurrent.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForCurrent.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForCurrent.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForCurrent.setEnd(LocalDateTime.of(2024, 2, 13, 10, 30, 20));
+        bookingForCurrent.setStatus(Status.APPROVED);
+        bookingForCurrent.setId(bookingRepository.save(bookingForCurrent).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForCurrent));
+
+        List<BookingDto> resultForCurrent = bookingService.getUsersBookingsPagination(1, "CURRENT", 1, 10);
+
+        System.out.println("result = " + resultForCurrent + " comparing to expected = " + expected);
+        assertThat(resultForCurrent.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForCurrent.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForCurrent.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForCurrent.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForPast = new Booking();
+        bookingForPast.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForPast.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForPast.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForPast.setEnd(LocalDateTime.of(2020, 2, 13, 10, 30, 20));
+        bookingForPast.setStatus(Status.APPROVED);
+        bookingForPast.setId(bookingRepository.save(bookingForPast).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForPast));
+
+        List<BookingDto> resultForPast = bookingService.getUsersBookingsPagination(1, "PAST", 1, 10);
+
+        System.out.println("result = " + resultForPast + " comparing to expected = " + expected);
+        assertThat(resultForPast.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForPast.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForPast.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForPast.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForFuture = new Booking();
+        bookingForFuture.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForFuture.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForFuture.setStart(LocalDateTime.of(2023, 12, 3, 19, 16, 40));
+        bookingForFuture.setEnd(LocalDateTime.of(2023, 12, 13, 10, 30, 20));
+        bookingForFuture.setStatus(Status.APPROVED);
+        bookingForFuture.setId(bookingRepository.save(bookingForFuture).getId());
+        expected = new ArrayList<>();
+        expected.add(firstBookingDto);
+        expected.add(BookingMapper.convertToDto(bookingForFuture));
+
+        List<BookingDto> resultForFuture = bookingService.getUsersBookingsPagination(1, "FUTURE", 1, 10);
+
+        System.out.println("result = " + resultForFuture + " comparing to expected = " + expected);
+        assertThat(resultForFuture.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForFuture.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForFuture.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForFuture.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+        assertThat(resultForFuture.get(1).getId(), equalTo(expected.get(1).getId()));
+        assertThat(resultForFuture.get(1).getBooker().getId(), equalTo(expected.get(1).getBooker().getId()));
+        assertThat(resultForFuture.get(1).getItem().getId(), equalTo(expected.get(1).getItem().getId()));
+        assertThat(resultForFuture.get(1).getStatus(), equalTo(expected.get(1).getStatus()));
+
+        expected.remove(1);
+        List<BookingDto> resultForWaiting = bookingService.getUsersBookingsPagination(1, "WAITING", 1, 10);
+        System.out.println("result = " + resultForWaiting + " comparing to expected = " + expected);
+        assertThat(resultForWaiting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForWaiting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForWaiting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForWaiting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking BookingForRejected = new Booking();
+        BookingForRejected.setBooker(UserMapper.convertToUser(firstUserDto));
+        BookingForRejected.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        BookingForRejected.setStart(LocalDateTime.of(2020, 12, 3, 19, 16, 40));
+        BookingForRejected.setEnd(LocalDateTime.of(2027, 12, 13, 10, 30, 20));
+        BookingForRejected.setStatus(Status.REJECTED);
+        BookingForRejected.setId(bookingRepository.save(BookingForRejected).getId());
+        expected = new ArrayList<>();
+        expected.add(BookingMapper.convertToDto(BookingForRejected));
+
+        List<BookingDto> resultForRejecting = bookingService.getUsersBookingsPagination(1, "REJECTED", 1, 10);
+
+        System.out.println("result = " + resultForRejecting + " comparing to expected = " + expected);
+        assertThat(resultForRejecting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForRejecting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForRejecting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForRejecting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+    }
+
+    @Test
+    @Order(value = 6)
+    @DisplayName("6 - should get user's item's bookings.")
     void ShouldGetUsersItemsBookings() {
         List<BookingDto> expected = Collections.singletonList(firstBookingDto);
 
@@ -182,5 +367,186 @@ public class BookingServiceImplTests {
         assertThat(result.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
         assertThat(result.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
         assertThat(result.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForCurrent = new Booking();
+        bookingForCurrent.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForCurrent.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForCurrent.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForCurrent.setEnd(LocalDateTime.of(2024, 2, 13, 10, 30, 20));
+        bookingForCurrent.setStatus(Status.APPROVED);
+        bookingForCurrent.setId(bookingRepository.save(bookingForCurrent).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForCurrent));
+
+        List<BookingDto> resultForCurrent = bookingService.getUsersItemsBookings(2, "CURRENT");
+
+        System.out.println("result = " + resultForCurrent + " comparing to expected = " + expected);
+        assertThat(resultForCurrent.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForCurrent.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForCurrent.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForCurrent.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForPast = new Booking();
+        bookingForPast.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForPast.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForPast.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForPast.setEnd(LocalDateTime.of(2020, 2, 13, 10, 30, 20));
+        bookingForPast.setStatus(Status.APPROVED);
+        bookingForPast.setId(bookingRepository.save(bookingForPast).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForPast));
+
+        List<BookingDto> resultForPast = bookingService.getUsersItemsBookings(2, "PAST");
+
+        System.out.println("result = " + resultForPast + " comparing to expected = " + expected);
+        assertThat(resultForPast.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForPast.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForPast.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForPast.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForFuture = new Booking();
+        bookingForFuture.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForFuture.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForFuture.setStart(LocalDateTime.of(2023, 12, 3, 19, 16, 40));
+        bookingForFuture.setEnd(LocalDateTime.of(2023, 12, 13, 10, 30, 20));
+        bookingForFuture.setStatus(Status.APPROVED);
+        bookingForFuture.setId(bookingRepository.save(bookingForFuture).getId());
+        expected = new ArrayList<>();
+        expected.add(firstBookingDto);
+        expected.add(BookingMapper.convertToDto(bookingForFuture));
+
+        List<BookingDto> resultForFuture = bookingService.getUsersItemsBookings(2, "FUTURE");
+
+        System.out.println("result = " + resultForFuture + " comparing to expected = " + expected);
+        assertThat(resultForFuture.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForFuture.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForFuture.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForFuture.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+        assertThat(resultForFuture.get(1).getId(), equalTo(expected.get(1).getId()));
+        assertThat(resultForFuture.get(1).getBooker().getId(), equalTo(expected.get(1).getBooker().getId()));
+        assertThat(resultForFuture.get(1).getItem().getId(), equalTo(expected.get(1).getItem().getId()));
+        assertThat(resultForFuture.get(1).getStatus(), equalTo(expected.get(1).getStatus()));
+
+        expected.remove(1);
+        List<BookingDto> resultForWaiting = bookingService.getUsersItemsBookings(2, "WAITING");
+        System.out.println("result = " + resultForWaiting + " comparing to expected = " + expected);
+        assertThat(resultForWaiting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForWaiting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForWaiting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForWaiting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking BookingForRejected = new Booking();
+        BookingForRejected.setBooker(UserMapper.convertToUser(firstUserDto));
+        BookingForRejected.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        BookingForRejected.setStart(LocalDateTime.of(2020, 12, 3, 19, 16, 40));
+        BookingForRejected.setEnd(LocalDateTime.of(2027, 12, 13, 10, 30, 20));
+        BookingForRejected.setStatus(Status.REJECTED);
+        BookingForRejected.setId(bookingRepository.save(BookingForRejected).getId());
+        expected = new ArrayList<>();
+        expected.add(BookingMapper.convertToDto(BookingForRejected));
+
+        List<BookingDto> resultForRejecting = bookingService.getUsersItemsBookings(2, "REJECTED");
+
+        System.out.println("result = " + resultForRejecting + " comparing to expected = " + expected);
+        assertThat(resultForRejecting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForRejecting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForRejecting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForRejecting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+    }
+
+    @Test
+    @Order(value = 7)
+    @DisplayName("7 - should get user's item's bookings pagination.")
+    void ShouldGetUsersItemsBookingsPagination() {
+        List<BookingDto> expected = Collections.singletonList(firstBookingDto);
+
+        List<BookingDto> result = bookingService.getUsersItemsBookingsPagination(2, "ALL", 1, 10);
+
+        System.out.println("result = " + result + " comparing to expected = " + expected);
+        assertThat(result.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(result.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(result.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(result.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForCurrent = new Booking();
+        bookingForCurrent.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForCurrent.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForCurrent.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForCurrent.setEnd(LocalDateTime.of(2024, 2, 13, 10, 30, 20));
+        bookingForCurrent.setStatus(Status.APPROVED);
+        bookingForCurrent.setId(bookingRepository.save(bookingForCurrent).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForCurrent));
+
+        List<BookingDto> resultForCurrent = bookingService.getUsersItemsBookingsPagination(2, "CURRENT", 1, 10);
+
+        System.out.println("result = " + resultForCurrent + " comparing to expected = " + expected);
+        assertThat(resultForCurrent.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForCurrent.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForCurrent.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForCurrent.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForPast = new Booking();
+        bookingForPast.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForPast.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForPast.setStart(LocalDateTime.of(2020, 2, 3, 19, 16, 40));
+        bookingForPast.setEnd(LocalDateTime.of(2020, 2, 13, 10, 30, 20));
+        bookingForPast.setStatus(Status.APPROVED);
+        bookingForPast.setId(bookingRepository.save(bookingForPast).getId());
+        expected = Collections.singletonList(BookingMapper.convertToDto(bookingForPast));
+
+        List<BookingDto> resultForPast = bookingService.getUsersItemsBookingsPagination(2, "PAST", 1, 10);
+
+        System.out.println("result = " + resultForPast + " comparing to expected = " + expected);
+        assertThat(resultForPast.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForPast.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForPast.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForPast.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking bookingForFuture = new Booking();
+        bookingForFuture.setBooker(UserMapper.convertToUser(firstUserDto));
+        bookingForFuture.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        bookingForFuture.setStart(LocalDateTime.of(2023, 12, 3, 19, 16, 40));
+        bookingForFuture.setEnd(LocalDateTime.of(2023, 12, 13, 10, 30, 20));
+        bookingForFuture.setStatus(Status.APPROVED);
+        bookingForFuture.setId(bookingRepository.save(bookingForFuture).getId());
+        expected = new ArrayList<>();
+        expected.add(firstBookingDto);
+        expected.add(BookingMapper.convertToDto(bookingForFuture));
+
+        List<BookingDto> resultForFuture = bookingService.getUsersItemsBookingsPagination(2, "FUTURE", 1, 10);
+
+        System.out.println("result = " + resultForFuture + " comparing to expected = " + expected);
+        assertThat(resultForFuture.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForFuture.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForFuture.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForFuture.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+        assertThat(resultForFuture.get(1).getId(), equalTo(expected.get(1).getId()));
+        assertThat(resultForFuture.get(1).getBooker().getId(), equalTo(expected.get(1).getBooker().getId()));
+        assertThat(resultForFuture.get(1).getItem().getId(), equalTo(expected.get(1).getItem().getId()));
+        assertThat(resultForFuture.get(1).getStatus(), equalTo(expected.get(1).getStatus()));
+
+        expected.remove(1);
+        List<BookingDto> resultForWaiting = bookingService.getUsersItemsBookingsPagination(2, "WAITING", 1, 10);
+        System.out.println("result = " + resultForWaiting + " comparing to expected = " + expected);
+        assertThat(resultForWaiting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForWaiting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForWaiting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForWaiting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
+
+        Booking BookingForRejected = new Booking();
+        BookingForRejected.setBooker(UserMapper.convertToUser(firstUserDto));
+        BookingForRejected.setItem(ItemMapper.convertToItem(fourthItemDto, UserMapper.convertToUser(secondUserDto)));
+        BookingForRejected.setStart(LocalDateTime.of(2020, 12, 3, 19, 16, 40));
+        BookingForRejected.setEnd(LocalDateTime.of(2027, 12, 13, 10, 30, 20));
+        BookingForRejected.setStatus(Status.REJECTED);
+        BookingForRejected.setId(bookingRepository.save(BookingForRejected).getId());
+        expected = new ArrayList<>();
+        expected.add(BookingMapper.convertToDto(BookingForRejected));
+
+        List<BookingDto> resultForRejecting = bookingService.getUsersItemsBookingsPagination(2, "REJECTED", 1, 10);
+
+        System.out.println("result = " + resultForRejecting + " comparing to expected = " + expected);
+        assertThat(resultForRejecting.get(0).getId(), equalTo(expected.get(0).getId()));
+        assertThat(resultForRejecting.get(0).getBooker().getId(), equalTo(expected.get(0).getBooker().getId()));
+        assertThat(resultForRejecting.get(0).getItem().getId(), equalTo(expected.get(0).getItem().getId()));
+        assertThat(resultForRejecting.get(0).getStatus(), equalTo(expected.get(0).getStatus()));
     }
 }

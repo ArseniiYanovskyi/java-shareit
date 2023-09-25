@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dao.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -23,6 +26,7 @@ import static org.hamcrest.Matchers.equalTo;
 @DataJpaTest
 @DisplayName("BookingRepository")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingRepositoryTests {
     @Autowired
@@ -326,5 +330,252 @@ public class BookingRepositoryTests {
         assertThat(expected.getStart(), equalTo(result.get().getStart()));
         assertThat(expected.getEnd(), equalTo(result.get().getEnd()));
         assertThat(expected.getStatus(), equalTo(result.get().getStatus()));
+    }
+
+    @Test
+    @Order(value = 13)
+    @DisplayName("13 - findAllByBooker_IdOrderByStartDesc Pagination.")
+    void shouldFindFirstPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result = bookingRepository.findAllByBooker_IdOrderByStartDesc
+                (1, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 14)
+    @DisplayName("14 - findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc.")
+    void shouldFindSecondPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.of(2024, 1, 4, 18, 15, 30),
+                                LocalDateTime.of(2024, 1, 7, 11, 50, 30),
+                                1, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 15)
+    @DisplayName("15 - findAllByEndBeforeAndBooker_IdIsOrderByStartDesc Pagination.")
+    void shouldFindThirdPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.of(2024, 1, 24, 18, 15, 30),
+                                1, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 16)
+    @DisplayName("16 -findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc Pagination.")
+    void shouldFindFourthPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
+                        (LocalDateTime.of(2022, 1, 24, 18, 15, 30),
+                                1, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 17)
+    @DisplayName("17 - findAllByStatusAndBooker_IdIsOrderByStartDesc Pagination.")
+    void shouldFindFifthPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
+                        (Status.WAITING, 1, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 18)
+    @DisplayName("18 - findAllByItem_Owner_IdOrderByStartDescPagination.")
+    void shouldFindSixthPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByItem_Owner_IdOrderByStartDesc
+                        (2, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 19)
+    @DisplayName("19 - findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc Pagination.")
+    void shouldFindSeventhPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.of(2024, 1, 4, 18, 15, 30),
+                                LocalDateTime.of(2024, 1, 7, 11, 50, 30),
+                                2, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 20)
+    @DisplayName("20 - findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc Pagination.")
+    void shouldFindEighthPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.of(2024, 1, 24, 18, 15, 30),
+                                2, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 21)
+    @DisplayName("21 - findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc Pagination.")
+    void shouldFindNinthPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
+                        (LocalDateTime.of(2022, 1, 24, 18, 15, 30),
+                                2, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
+    }
+
+    @Test
+    @Order(value = 22)
+    @DisplayName("22 - findAllByStatusAndItem_Owner_IdIsOrderByStartDesc Pagination.")
+    void shouldFindTenthPagination() {
+        List<Booking> expected = Collections.singletonList(firstBooking);
+        final PageImpl<Booking> expectedPage = new PageImpl<>(expected);
+        Page<Booking> result =
+                bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
+                        (Status.WAITING, 2, PageRequest.ofSize(10));
+
+        assertThat(expectedPage.getTotalElements(), equalTo(result.getTotalElements()));
+
+        Booking firstBookingResult = result.stream()
+                .filter(booking -> booking.getId() == expected.get(0).getId())
+                .findFirst()
+                .get();
+
+        assertThat(expected.get(0).getBooker().getId(), equalTo(firstBookingResult.getBooker().getId()));
+        assertThat(expected.get(0).getItem().getId(), equalTo(firstBookingResult.getItem().getId()));
+        assertThat(expected.get(0).getStart(), equalTo(firstBookingResult.getStart()));
+        assertThat(expected.get(0).getEnd(), equalTo(firstBookingResult.getEnd()));
+        assertThat(expected.get(0).getStatus(), equalTo(firstBookingResult.getStatus()));
     }
 }

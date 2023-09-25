@@ -71,6 +71,4 @@ public class ItemController {
         }
         return itemService.searchInDescription(text);
     }
-
-
 }

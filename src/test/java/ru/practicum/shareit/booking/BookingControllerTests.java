@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("BookingController")
 @WebMvcTest(controllers = BookingController.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
 public class BookingControllerTests {
     private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";

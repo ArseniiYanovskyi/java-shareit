@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("ItemController")
 @WebMvcTest(controllers = ItemController.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
 public class ItemControllerTests {
     private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";

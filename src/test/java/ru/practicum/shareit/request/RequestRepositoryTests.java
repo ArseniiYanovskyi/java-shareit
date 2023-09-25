@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dao.RequestRepository;
@@ -21,6 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 @DataJpaTest
 @DisplayName("RequestRepository")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RequestRepositoryTests {
     @Autowired
@@ -87,7 +91,7 @@ public class RequestRepositoryTests {
     @DisplayName("1 - findAllByPublisher.")
     void findFirst() {
         List<ItemRequest> expected = Collections.singletonList(firstItemRequest);
-        List<ItemRequest> result = requestRepository.findAllByPublisher(1);
+        List<ItemRequest> result = requestRepository.findAllByPublisher(firstUser.getId());
 
         assertThat(expected.size(), equalTo(result.size()));
 
@@ -101,14 +105,36 @@ public class RequestRepositoryTests {
     @Order(value = 2)
     @DisplayName("2 - findAllByPublisherIsNotOrderByCreationDateDesc.")
     void findSecond() {
-        List<ItemRequest> expected = Collections.singletonList(firstItemRequest);
-        List<ItemRequest> result = requestRepository.findAllByPublisherIsNotOrderByCreationDateDesc(2);
+        List<ItemRequest> expectingResult = Collections.singletonList(firstItemRequest);
+        List<ItemRequest> actualResult = requestRepository.findAllByPublisherIsNotOrderByCreationDateDesc(secondUser.getId());
 
-        assertThat(expected.size(), equalTo(result.size()));
+        assertThat(expectingResult.size(), equalTo(actualResult.size()));
 
-        assertThat(expected.get(0).getId(), equalTo(result.get(0).getId()));
-        assertThat(expected.get(0).getPublisher(), equalTo(result.get(0).getPublisher()));
-        assertThat(expected.get(0).getDescription(), equalTo(result.get(0).getDescription()));
-        assertThat(expected.get(0).getCreationDate(), equalTo(result.get(0).getCreationDate()));
+        assertThat(expectingResult.get(0).getId(), equalTo(actualResult.get(0).getId()));
+        assertThat(expectingResult.get(0).getPublisher(), equalTo(actualResult.get(0).getPublisher()));
+        assertThat(expectingResult.get(0).getDescription(), equalTo(actualResult.get(0).getDescription()));
+        assertThat(expectingResult.get(0).getCreationDate(), equalTo(actualResult.get(0).getCreationDate()));
+    }
+
+    @Test
+    @Order(value = 3)
+    @DisplayName("3 - findAllByPublisherIsNotOrderByCreationDateDesc Pagination.")
+    void findSecondPagination() {
+        List<ItemRequest> expectingResult = Collections.singletonList(firstItemRequest);
+        final PageImpl<ItemRequest> expectingResultPage = new PageImpl<>(expectingResult);
+
+        Page<ItemRequest> actualResult = requestRepository.findAllByPublisherIsNotOrderByCreationDateDesc
+                (secondUser.getId(), PageRequest.ofSize(10));
+
+        assertThat(expectingResultPage.getTotalElements(), equalTo(actualResult.getTotalElements()));
+
+        ItemRequest expectingFirstItemRequest = actualResult.stream()
+                .filter(itemRequest -> itemRequest.getId() == firstItemRequest.getId())
+                .findFirst()
+                .get();
+
+        assertThat(expectingResult.get(0).getPublisher(), equalTo(expectingFirstItemRequest.getPublisher()));
+        assertThat(expectingResult.get(0).getDescription(), equalTo(expectingFirstItemRequest.getDescription()));
+        assertThat(expectingResult.get(0).getCreationDate(), equalTo(expectingFirstItemRequest.getCreationDate()));
     }
 }

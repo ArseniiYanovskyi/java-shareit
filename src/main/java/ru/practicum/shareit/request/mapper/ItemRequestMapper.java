@@ -10,6 +10,7 @@ import java.util.List;
 public class ItemRequestMapper {
     public static ItemRequest convertToRequest(ItemRequestDto itemRequestDto, long publisher) {
         ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(itemRequestDto.getId());
         itemRequest.setDescription(itemRequestDto.getDescription());
         itemRequest.setPublisher(publisher);
         itemRequest.setCreationDate(LocalDateTime.now());
