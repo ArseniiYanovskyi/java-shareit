@@ -28,6 +28,7 @@ public class BookingMapper {
                 .end(booking.getEnd())
                 .booker(UserMapper.convertToDto(booking.getBooker()))
                 .item(ItemMapper.convertToDto(booking.getItem()))
+                .itemId(booking.getItem().getId())
                 .status(booking.getStatus().toString())
                 .build();
     }

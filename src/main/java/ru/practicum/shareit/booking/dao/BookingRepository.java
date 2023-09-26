@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -22,6 +24,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByStatusAndBooker_IdIsOrderByStartDesc(Status status, long bookerId);
 
+    // getUsersBookingsPagination ----------
+    Page<Booking> findAllByBooker_IdOrderByStartDesc(long bookerId, Pageable page);
+
+    Page<Booking> findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
+            (LocalDateTime start, LocalDateTime end, long bookerId, Pageable page);
+
+    Page<Booking> findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
+            (LocalDateTime end, long bookerId, Pageable page);
+
+    Page<Booking> findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
+            (LocalDateTime start, long bookerId, Pageable page);
+
+    Page<Booking> findAllByStatusAndBooker_IdIsOrderByStartDesc
+            (Status status, long bookerId, Pageable page);
+
     // getUsersItemsBookings ----------
     List<Booking> findAllByItem_Owner_IdOrderByStartDesc(long ownerId);
 
@@ -33,6 +50,22 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime start, long ownerId);
 
     List<Booking> findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(Status status, long ownerId);
+
+    // getUsersItemsBookingsPagination ----------
+
+    Page<Booking> findAllByItem_Owner_IdOrderByStartDesc(long ownerId, Pageable page);
+
+    Page<Booking> findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
+            (LocalDateTime start, LocalDateTime end, long ownerId, Pageable page);
+
+    Page<Booking> findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
+            (LocalDateTime end, long ownerId, Pageable page);
+
+    Page<Booking> findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
+            (LocalDateTime start, long ownerId, Pageable page);
+
+    Page<Booking> findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
+            (Status status, long ownerId, Pageable page);
 
     // last and next bookings by item id --------------
 

@@ -2,11 +2,14 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
+import ru.practicum.shareit.exceptions.model.ValidationException;
 import ru.practicum.shareit.item.Comment.CommentRepository;
 import ru.practicum.shareit.item.Comment.model.Comment;
 import ru.practicum.shareit.item.Comment.model.CommentDto;
@@ -34,23 +37,22 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final ItemServiceUtils utils;
-
     @Override
     @Transactional
     public ItemDto addItem(long userId, ItemDto itemDto) {
         utils.checkItemDtoValidation(itemDto);
         utils.checkIsItemAvailable(itemDto);
 
-        User owner = UserMapper.convertToUser(userService.getUserDtoById(userId));
-
+        User owner = userService.getUserById(userId);
+        System.out.println(owner);
         Item item = utils.convertToItem(itemDto, owner);
+        System.out.println(item);
 
         log.debug("Sending to DAO item to create with name {} and description {} from user {}.",
-                item.getName(), item.getDescription(), userId);
+                itemDto.getName(), itemDto.getDescription(), userId);
 
         return utils.convertToDto(itemRepository.save(item));
     }
-
     @Override
     @Transactional
     public ItemDto updateItem(long userId, ItemDto itemDto) {
@@ -78,7 +80,6 @@ public class ItemServiceImpl implements ItemService {
 
         return getItemDtoById(itemId, userId);
     }
-
     @Override
     @Transactional
     public ItemDto getItemDtoById(long itemId, long userId) {
@@ -102,7 +103,6 @@ public class ItemServiceImpl implements ItemService {
 
         return itemDto;
     }
-
     @Override
     @Transactional
     public Item getItemById(long itemId) {
@@ -110,7 +110,6 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
-
     @Override
     @Transactional
     public List<ItemDto> getItemsByUserId(long userId) {
@@ -143,7 +142,44 @@ public class ItemServiceImpl implements ItemService {
                 })
                 .collect(Collectors.toList());
     }
+    @Override
+    @Transactional
+    public List<ItemDto> getItemsByUserIdPagination(long userId, int from, int size) {
+        userService.checkIsUserPresent(userId);
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
+        if (size < 1) {
+            throw new ValidationException("Size is too small.");
+        }
 
+        log.debug("Sending to DAO request for get items by user id {} pagination.", userId);
+
+        Page<Item> items = itemRepository.findAllByOwner_IdOrderByIdAsc(userId, PageRequest.of(from / size, size));
+
+        return items.stream()
+                .map(ItemMapper::convertToDto)
+                .map(itemDto -> {
+                    Optional<Booking> lastBooking = Optional.ofNullable
+                            (bookingService.getLastBookingForItem(itemDto.getId()));
+                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
+                    return itemDto;
+                })
+                .map(itemDto -> {
+                    Optional<Booking> nextBooking = Optional.ofNullable
+                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
+                    return itemDto;
+                })
+                .map(itemDto -> {
+                    itemDto.setComments(
+                            commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
+                                    .map(ItemMapper::convertToDto)
+                                    .collect(Collectors.toList()));
+                    return itemDto;
+                })
+                .collect(Collectors.toList());
+    }
     @Override
     @Transactional
     public List<ItemDto> searchInDescription(String text) {
@@ -158,7 +194,27 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::convertToDto)
                 .collect(Collectors.toList());
     }
+    @Override
+    @Transactional
+    public List<ItemDto> searchInDescriptionPagination(String text, int from, int size) {
+        log.debug("Sending to DAO request to search items by text \"{}\" (pagination).", text);
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
+        if (size < 1) {
+            throw new ValidationException("Size is too small.");
+        }
+        if (text.isBlank()) {
+            return new ArrayList<>();
+        }
+        Page<Item> items = itemRepository.findAllByDescriptionContainsIgnoreCase
+                (text, PageRequest.of(from / size, size));
 
+        return items.stream()
+                .filter(Item::getIsAvailable)
+                .map(ItemMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
     @Override
     @Transactional
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
@@ -169,12 +225,12 @@ public class ItemServiceImpl implements ItemService {
 
         return utils.convertToDto(commentRepository.save(comment));
     }
-
     @Override
     @Transactional
-    public void deleteUserItems(long userId) {
-        //проверка наличия пользователя отсутствует потому что метод вызывается после удаления пользователя
-        log.debug("Sending to DAO request to delete user id {} items.", userId);
-        itemRepository.deleteById(userId);
+    public List<ItemDto> getItemsForRequest(long requestId) {
+        log.debug("Sending to DAO request to get items for request {}.", requestId);
+        return itemRepository.findAllByRequest(requestId).stream()
+                .map(ItemMapper::convertToDto)
+                .collect(Collectors.toList());
     }
 }

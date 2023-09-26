@@ -22,6 +22,7 @@ public class ItemMapper {
         if (owner != null) {
             item.setOwner(owner);
         }
+        item.setRequest(itemDto.getRequestId());
         return item;
     }
 
@@ -31,6 +32,7 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getIsAvailable())
+                .requestId(item.getRequest())
                 .build();
     }
 

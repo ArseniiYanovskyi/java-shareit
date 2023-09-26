@@ -49,9 +49,5 @@ public class UserController {
         log.debug("Received request to delete user with id {}.", userId);
 
         userService.deleteUser(userId);
-
-        /*log.debug("Sending to ItemService request to delete deleted user items.");
-        itemService.deleteUserItems(userId);*/
-        //не хочу удалять эти строчки кода, потому что нахожу такое поведение логичным
     }
 }

@@ -51,17 +51,24 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader(HTTP_HEADER_USER_ID) long userId) {
+    public List<ItemDto> getUserItems(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+                                      @RequestParam(value = "from", required = false) Integer from,
+                                      @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request to get items list by user id {}.", userId);
-
+        if (from != null && size != null) {
+            return itemService.getItemsByUserIdPagination(userId, from, size);
+        }
         return itemService.getItemsByUserId(userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchForItems(@RequestParam String text) {
+    public List<ItemDto> searchForItems(@RequestParam String text,
+                                        @RequestParam(value = "from", required = false) Integer from,
+                                        @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request for search items by description with text: \"{}\"", text);
-
+        if (from != null && size != null) {
+            return itemService.searchInDescriptionPagination(text, from, size);
+        }
         return itemService.searchInDescription(text);
     }
-
 }
