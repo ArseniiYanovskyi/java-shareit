@@ -31,8 +31,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getOtherUsersExistingRequestsPagination
-            (@RequestHeader(httpHeaderUserId) long userId,
+    public ResponseEntity<Object> getOtherUsersExistingRequestsPagination(@RequestHeader(httpHeaderUserId) long userId,
              @RequestParam(value = "from", required = false) Integer from,
              @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request from user {} to get other users ItemsRequests.", userId);
