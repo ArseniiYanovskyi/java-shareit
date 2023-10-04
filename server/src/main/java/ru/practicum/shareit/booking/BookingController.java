@@ -14,10 +14,10 @@ import java.util.List;
 @Slf4j
 public class BookingController {
     private final BookingService bookingService;
-    private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
+    private final String httpHeaderUserId = "X-Sharer-User-Id";
 
     @PostMapping
-    public BookingDto createBooking(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public BookingDto createBooking(@RequestHeader(httpHeaderUserId) long userId,
                                     @RequestBody BookingDto bookingDto) {
         log.debug("Received request to create new booking from user {}.", userId);
 
@@ -25,7 +25,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto changeItemStatus(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public BookingDto changeItemStatus(@RequestHeader(httpHeaderUserId) long userId,
                                        @PathVariable(value = "bookingId") long bookingId,
                                        @RequestParam(required = true) boolean approved) {
         log.debug("Received request from user {} to change status to {} in booking {}.", userId, approved, bookingId);
@@ -34,7 +34,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getInfoAboutBooking(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public BookingDto getInfoAboutBooking(@RequestHeader(httpHeaderUserId) long userId,
                                           @PathVariable(value = "bookingId") long bookingId) {
         log.debug("Received request to get info about booking {} from user {}.", userId, bookingId);
 
@@ -42,7 +42,7 @@ public class BookingController {
     }
 
     @GetMapping()
-    public List<BookingDto> getUsersBookings(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public List<BookingDto> getUsersBookings(@RequestHeader(httpHeaderUserId) long userId,
                                              @RequestParam(defaultValue = "ALL") String state,
                                              @RequestParam(value = "from", required = false) Integer from,
                                              @RequestParam(value = "size", required = false) Integer size) {
@@ -54,7 +54,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getUsersItemsBookings(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public List<BookingDto> getUsersItemsBookings(@RequestHeader(httpHeaderUserId) long userId,
                                                   @RequestParam(defaultValue = "ALL") String state,
                                                   @RequestParam(value = "from", required = false) Integer from,
                                                   @RequestParam(value = "size", required = false) Integer size) {

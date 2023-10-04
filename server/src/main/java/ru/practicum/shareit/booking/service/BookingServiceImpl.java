@@ -77,24 +77,19 @@ public class BookingServiceImpl implements BookingService {
                 resultList = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime.now(), LocalDateTime.now(), userId);
                 break;
             case "PAST":
-                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc(LocalDateTime.now(), userId);
                 break;
             case "FUTURE":
-                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime.now(), userId);
                 break;
             case "WAITING":
-                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                        (Status.WAITING, userId);
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc(Status.WAITING, userId);
                 break;
             case "REJECTED":
-                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                        (Status.REJECTED, userId);
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc(Status.REJECTED, userId);
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -121,24 +116,19 @@ public class BookingServiceImpl implements BookingService {
                 resultList = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId, PageRequest.of(from / size, size));
                 break;
             case "CURRENT":
-                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime.now(), LocalDateTime.now(), userId, PageRequest.of(from / size, size));
                 break;
             case "PAST":
-                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc(LocalDateTime.now(), userId, PageRequest.of(from / size, size));
                 break;
             case "FUTURE":
-                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime.now(), userId, PageRequest.of(from / size, size));
                 break;
             case "WAITING":
-                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                        (Status.WAITING, userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc(Status.WAITING, userId, PageRequest.of(from / size, size));
                 break;
             case "REJECTED":
-                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                        (Status.REJECTED, userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc(Status.REJECTED, userId, PageRequest.of(from / size, size));
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -159,24 +149,19 @@ public class BookingServiceImpl implements BookingService {
                 resultList = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime.now(), LocalDateTime.now(), userId);
                 break;
             case "PAST":
-                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime.now(), userId);
                 break;
             case "FUTURE":
-                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime.now(), userId);
                 break;
             case "WAITING":
-                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                        (Status.WAITING, userId);
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(Status.WAITING, userId);
                 break;
             case "REJECTED":
-                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                        (Status.REJECTED, userId);
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(Status.REJECTED, userId);
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -200,28 +185,22 @@ public class BookingServiceImpl implements BookingService {
         Page<Booking> resultList;
         switch (state) {
             case "ALL":
-                resultList = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc
-                        (userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId, PageRequest.of(from / size, size));
                 break;
             case "CURRENT":
-                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime.now(), LocalDateTime.now(), userId, PageRequest.of(from / size, size));
                 break;
             case "PAST":
-                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime.now(), userId, PageRequest.of(from / size, size));
                 break;
             case "FUTURE":
-                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime.now(), userId, PageRequest.of(from / size, size));
                 break;
             case "WAITING":
-                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                        (Status.WAITING, userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(Status.WAITING, userId, PageRequest.of(from / size, size));
                 break;
             case "REJECTED":
-                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                        (Status.REJECTED, userId, PageRequest.of(from / size, size));
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(Status.REJECTED, userId, PageRequest.of(from / size, size));
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -235,16 +214,14 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public Booking getLastBookingForItem(long itemId) {
         log.debug("Sending to DAO request to get last booking for item {}.", itemId);
-        return bookingRepository.findFirstByItem_IdAndStartIsBeforeOrderByStartDesc
-                (itemId, LocalDateTime.now()).orElse(null);
+        return bookingRepository.findFirstByItem_IdAndStartIsBeforeOrderByStartDesc(itemId, LocalDateTime.now()).orElse(null);
     }
 
     @Override
     @Transactional
     public Booking getNextBookingForItem(long itemId) {
         log.debug("Sending to DAO request to get next booking for item {}.", itemId);
-        return bookingRepository.findFirstByItem_IdAndStartIsAfterAndStatusOrderByStartAsc
-                (itemId, LocalDateTime.now(), Status.APPROVED).orElse(null);
+        return bookingRepository.findFirstByItem_IdAndStartIsAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), Status.APPROVED).orElse(null);
     }
 
     private Booking getBookingById(long bookingId) {

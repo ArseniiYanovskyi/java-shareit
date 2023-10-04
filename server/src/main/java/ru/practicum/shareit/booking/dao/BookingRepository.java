@@ -15,8 +15,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // getUsersBookings ----------
     List<Booking> findAllByBooker_IdOrderByStartDesc(long bookerId);
 
-    List<Booking> findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
-            (LocalDateTime start, LocalDateTime end, long bookerId);
+    List<Booking> findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime start, LocalDateTime end, long bookerId);
 
     List<Booking> findAllByEndBeforeAndBooker_IdIsOrderByStartDesc(LocalDateTime end, long bookerId);
 
@@ -27,23 +26,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // getUsersBookingsPagination ----------
     Page<Booking> findAllByBooker_IdOrderByStartDesc(long bookerId, Pageable page);
 
-    Page<Booking> findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
-            (LocalDateTime start, LocalDateTime end, long bookerId, Pageable page);
+    Page<Booking> findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime start, LocalDateTime end, long bookerId, Pageable page);
 
-    Page<Booking> findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
-            (LocalDateTime end, long bookerId, Pageable page);
+    Page<Booking> findAllByEndBeforeAndBooker_IdIsOrderByStartDesc(LocalDateTime end, long bookerId, Pageable page);
 
-    Page<Booking> findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
-            (LocalDateTime start, long bookerId, Pageable page);
+    Page<Booking> findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc(LocalDateTime start, long bookerId, Pageable page);
 
-    Page<Booking> findAllByStatusAndBooker_IdIsOrderByStartDesc
-            (Status status, long bookerId, Pageable page);
+    Page<Booking> findAllByStatusAndBooker_IdIsOrderByStartDesc(Status status, long bookerId, Pageable page);
 
     // getUsersItemsBookings ----------
     List<Booking> findAllByItem_Owner_IdOrderByStartDesc(long ownerId);
 
-    List<Booking> findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
-            (LocalDateTime start, LocalDateTime end, long ownerId);
+    List<Booking> findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime start, LocalDateTime end, long ownerId);
 
     List<Booking> findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime end, long ownerId);
 
@@ -55,17 +49,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findAllByItem_Owner_IdOrderByStartDesc(long ownerId, Pageable page);
 
-    Page<Booking> findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
-            (LocalDateTime start, LocalDateTime end, long ownerId, Pageable page);
+    Page<Booking> findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime start, LocalDateTime end, long ownerId, Pageable page);
 
-    Page<Booking> findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
-            (LocalDateTime end, long ownerId, Pageable page);
+    Page<Booking> findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime end, long ownerId, Pageable page);
 
-    Page<Booking> findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
-            (LocalDateTime start, long ownerId, Pageable page);
+    Page<Booking> findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc(LocalDateTime start, long ownerId, Pageable page);
 
-    Page<Booking> findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-            (Status status, long ownerId, Pageable page);
+    Page<Booking> findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(Status status, long ownerId, Pageable page);
 
     // last and next bookings by item id --------------
 
