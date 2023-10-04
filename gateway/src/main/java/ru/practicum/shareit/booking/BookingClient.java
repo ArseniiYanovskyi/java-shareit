@@ -46,8 +46,7 @@ public class BookingClient extends BaseClient {
         return get("?state=" + requestState.name(), userId);
     }
 
-    public ResponseEntity<Object> getUsersBookingsPagination
-            (long userId, String state, Integer from, Integer size) {
+    public ResponseEntity<Object> getUsersBookingsPagination(long userId, String state, Integer from, Integer size) {
         RequestState requestState = RequestState.from(state)
                 .orElseThrow(() -> new UnknownStateException("Unknown state: " + state));
         Map<String, Object> parameters = Map.of(
@@ -65,8 +64,7 @@ public class BookingClient extends BaseClient {
         return get("/owner?state=" + requestState.name(), userId);
     }
 
-    public ResponseEntity<Object> getUsersItemsBookingsPagination
-            (long userId, String state, Integer from, Integer size) {
+    public ResponseEntity<Object> getUsersItemsBookingsPagination(long userId, String state, Integer from, Integer size) {
         RequestState requestState = RequestState.from(state)
                 .orElseThrow(() -> new UnknownStateException("Unknown state: " + state));
         Map<String, Object> parameters = Map.of(

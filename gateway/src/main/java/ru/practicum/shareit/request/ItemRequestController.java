@@ -13,10 +13,10 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 public class ItemRequestController {
     private final ItemRequestClient requestClient;
 
-    private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
+    private final String httpHeaderUserId = "X-Sharer-User-Id";
 
     @PostMapping
-    public ResponseEntity<Object> addNewRequest(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> addNewRequest(@RequestHeader(httpHeaderUserId) long userId,
                                                 @RequestBody ItemRequestDto itemRequestDto) {
         log.debug("Received request to add new ItemRequest.");
 
@@ -24,7 +24,7 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getUsersRequests(@RequestHeader(HTTP_HEADER_USER_ID) long userId) {
+    public ResponseEntity<Object> getUsersRequests(@RequestHeader(httpHeaderUserId) long userId) {
         log.debug("Received request to get user {} request list.", userId);
 
         return requestClient.getUserRequests(userId);
@@ -32,7 +32,7 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getOtherUsersExistingRequestsPagination
-            (@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+            (@RequestHeader(httpHeaderUserId) long userId,
              @RequestParam(value = "from", required = false) Integer from,
              @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request from user {} to get other users ItemsRequests.", userId);
@@ -45,7 +45,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> getRequest(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> getRequest(@RequestHeader(httpHeaderUserId) long userId,
                                              @PathVariable(value = "requestId") long requestId) {
         log.debug("Received request to get request {}.", requestId);
 

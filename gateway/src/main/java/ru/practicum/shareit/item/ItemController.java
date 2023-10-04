@@ -13,10 +13,10 @@ import ru.practicum.shareit.item.dto.ItemDto;
 @Slf4j
 public class ItemController {
     private final ItemClient itemClient;
-    private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
+    private final String httpHeaderUserId = "X-Sharer-User-Id";
 
     @PostMapping
-    public ResponseEntity<Object> addItem(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> addItem(@RequestHeader(httpHeaderUserId) long userId,
                                           @RequestBody ItemDto itemDto) {
         log.debug("Received request to add new Item from user {}.", userId);
 
@@ -24,7 +24,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> addComment(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> addComment(@RequestHeader(httpHeaderUserId) long userId,
                                              @PathVariable(value = "itemId") long itemId,
                                              @RequestBody CommentDto commentDto) {
         log.debug("Received request to add new comment from user {} to item {}.", userId, itemId);
@@ -32,7 +32,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> updateItem(@RequestHeader(httpHeaderUserId) long userId,
                                              @RequestBody ItemDto itemDto,
                                              @PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to update existed Item with id {} from user id {}.", itemId, userId);
@@ -41,7 +41,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Object> getById(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> getById(@RequestHeader(httpHeaderUserId) long userId,
                                           @PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to get existed Item with id {}.", itemId);
 
@@ -49,7 +49,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getUserItems(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> getUserItems(@RequestHeader(httpHeaderUserId) long userId,
                                                @RequestParam(value = "from", required = false) Integer from,
                                                @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request to get items list by user id {}.", userId);

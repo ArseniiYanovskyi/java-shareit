@@ -13,10 +13,10 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 @Slf4j
 public class BookingController {
     private final BookingClient bookingClient;
-    private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
+    private final String httpHeaderUserId = "X-Sharer-User-Id";
 
     @PostMapping
-    public ResponseEntity<Object> createBooking(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> createBooking(@RequestHeader(httpHeaderUserId) long userId,
                                                 @RequestBody BookingDto bookingDto) {
         log.debug("Received request to create new booking from user {}.", userId);
 
@@ -24,7 +24,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<Object> changeItemStatus(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> changeItemStatus(@RequestHeader(httpHeaderUserId) long userId,
                                                    @PathVariable(value = "bookingId") long bookingId,
                                                    @RequestParam(required = true) boolean approved) {
         log.debug("Received request from user {} to change status to {} in booking {}.", userId, approved, bookingId);
@@ -33,7 +33,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getInfoAboutBooking(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> getInfoAboutBooking(@RequestHeader(httpHeaderUserId) long userId,
                                                       @PathVariable(value = "bookingId") long bookingId) {
         log.debug("Received request to get info about booking {} from user {}.", userId, bookingId);
 
@@ -41,7 +41,7 @@ public class BookingController {
     }
 
     @GetMapping()
-    public ResponseEntity<Object> getUsersBookings(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> getUsersBookings(@RequestHeader(httpHeaderUserId) long userId,
                                                    @RequestParam(defaultValue = "ALL") String state,
                                                    @RequestParam(value = "from", required = false) Integer from,
                                                    @RequestParam(value = "size", required = false) Integer size) {
@@ -53,7 +53,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> getUsersItemsBookings(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+    public ResponseEntity<Object> getUsersItemsBookings(@RequestHeader(httpHeaderUserId) long userId,
                                                         @RequestParam(defaultValue = "ALL") String state,
                                                         @RequestParam(value = "from", required = false) Integer from,
                                                         @RequestParam(value = "size", required = false) Integer size) {
