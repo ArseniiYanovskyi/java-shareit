@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     environment:
       - SHAREIT_GATEWAY_PORT=http://server:8080
-      - SHAREIT_SERVER_URL=http://server:9090
+      - SHAREIT_SERVER_URL=http://localhost:9090
 
   server:
     build: server
