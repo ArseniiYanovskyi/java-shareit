@@ -17,7 +17,7 @@ public class UserController {
 
     @PostMapping
     public UserDto addUser(@RequestBody UserDto userDto) {
-        log.debug("Received request to add new user.");
+        log.info("Received request to add new user.");
 
         return userService.addUser(userDto);
     }
@@ -25,28 +25,28 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable(value = "userId") long userId,
                               @RequestBody UserDto userDto) {
-        log.debug("Received request to update existed information about user with id {}.", userId);
+        log.info("Received request to update existed information about user with id {}.", userId);
 
         return userService.updateUser(userId, userDto);
     }
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable(value = "userId") long userId) {
-        log.debug("Received request to get existed user with id {}.", userId);
+        log.info("Received request to get existed user with id {}.", userId);
 
         return userService.getUserDtoById(userId);
     }
 
     @GetMapping
     public List<UserDto> getAll() {
-        log.debug("Received request to get all users.");
+        log.info("Received request to get all users.");
 
         return userService.getAllUsers();
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable(value = "userId") long userId) {
-        log.debug("Received request to delete user with id {}.", userId);
+        log.info("Received request to delete user with id {}.", userId);
 
         userService.deleteUser(userId);
     }

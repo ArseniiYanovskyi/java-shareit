@@ -48,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = utils.convertToItem(itemDto, owner);
         System.out.println(item);
 
-        log.debug("Sending to DAO item to create with name {} and description {} from user {}.",
+        log.info("Sending to DAO item to create with name {} and description {} from user {}.",
                 itemDto.getName(), itemDto.getDescription(), userId);
 
         return utils.convertToDto(itemRepository.save(item));
@@ -76,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
             item.setIsAvailable(itemDto.getAvailable());
         }
 
-        log.debug("Sending to DAO updated item.");
+        log.info("Sending to DAO updated item.");
         itemRepository.save(item);
 
         return getItemDtoById(itemId, userId);
@@ -107,7 +107,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public Item getItemById(long itemId) {
-        log.debug("Sending to DAO request to get item with id {}.", itemId);
+        log.info("Sending to DAO request to get item with id {}.", itemId);
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " does not present in repository."));
     }
@@ -117,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getItemsByUserId(long userId) {
         userService.checkIsUserPresent(userId);
 
-        log.debug("Sending to DAO request for get items by user id {}.", userId);
+        log.info("Sending to DAO request for get items by user id {}.", userId);
 
         List<Item> items = itemRepository.findAllByOwner_IdOrderByIdAsc(userId);
 
@@ -154,7 +154,7 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Size is too small.");
         }
 
-        log.debug("Sending to DAO request for get items by user id {} pagination.", userId);
+        log.info("Sending to DAO request for get items by user id {} pagination.", userId);
 
         Page<Item> items = itemRepository.findAllByOwner_IdOrderByIdAsc(userId, PageRequest.of(from / size, size));
 
@@ -183,7 +183,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public List<ItemDto> searchInDescription(String text) {
-        log.debug("Sending to DAO request to search items by text \"{}\".", text);
+        log.info("Sending to DAO request to search items by text \"{}\".", text);
         if (text.isBlank()) {
             return new ArrayList<>();
         }
@@ -198,7 +198,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public List<ItemDto> searchInDescriptionPagination(String text, int from, int size) {
-        log.debug("Sending to DAO request to search items by text \"{}\" (pagination).", text);
+        log.info("Sending to DAO request to search items by text \"{}\" (pagination).", text);
         if (from < 0) {
             throw new ValidationException("From value can not be negative.");
         }
@@ -222,7 +222,7 @@ public class ItemServiceImpl implements ItemService {
         utils.checkIfUserRentedItem(userId, itemId);
         Item item = getItemById(itemId);
         Comment comment = utils.createComment(commentDto, userId, item);
-        log.debug("Sending to DAO request to add new comment from user {} to item {}.", userId, itemId);
+        log.info("Sending to DAO request to add new comment from user {} to item {}.", userId, itemId);
 
         return utils.convertToDto(commentRepository.save(comment));
     }
@@ -230,7 +230,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public List<ItemDto> getItemsForRequest(long requestId) {
-        log.debug("Sending to DAO request to get items for request {}.", requestId);
+        log.info("Sending to DAO request to get items for request {}.", requestId);
         return itemRepository.findAllByRequest(requestId).stream()
                 .map(ItemMapper::convertToDto)
                 .collect(Collectors.toList());

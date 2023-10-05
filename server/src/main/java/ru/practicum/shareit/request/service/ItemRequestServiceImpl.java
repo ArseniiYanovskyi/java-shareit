@@ -27,7 +27,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto addNewRequest(long userId, ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest = utils.checkAndConvertToRequest(userId, itemRequestDto);
 
-        log.debug("Sending to DAO new ItemRequest from user {}.", userId);
+        log.info("Sending to DAO new ItemRequest from user {}.", userId);
         return utils.convertToDto(repository.save(itemRequest));
     }
 
@@ -36,7 +36,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getUserRequests(long userId) {
         utils.checkIsUserPresent(userId);
 
-        log.debug("Sending to DAO request to get user {} item requests.", userId);
+        log.info("Sending to DAO request to get user {} item requests.", userId);
         return repository.findAllByPublisher(userId).stream()
                 .map(utils::convertToDto)
                 .collect(Collectors.toList());
@@ -45,7 +45,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public List<ItemRequestDto> getOtherUsersRequests(long userId) {
-        log.debug("Sending to DAO request from user {} to get other users ItemRequests.", userId);
+        log.info("Sending to DAO request from user {} to get other users ItemRequests.", userId);
 
         return repository.findAllByPublisherIsNotOrderByCreationDateDesc(userId).stream()
                 .map(utils::convertToDto)
@@ -55,7 +55,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public List<ItemRequestDto> getOtherUsersRequestsPagination(long userId, int from, int size) {
-        log.debug("Sending to DAO request from user {} to get other users ItemRequests.", userId);
+        log.info("Sending to DAO request from user {} to get other users ItemRequests.", userId);
         if (from < 0) {
             throw new ValidationException("From value can not be negative.");
         }
@@ -73,7 +73,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional
     public ItemRequestDto getRequest(long userId, long requestId) {
         utils.checkIsUserPresent(userId);
-        log.debug("Sending to DAO request to get ItemRequest.");
+        log.info("Sending to DAO request to get ItemRequest.");
         return utils.convertToDto(repository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Item with id " + requestId + " does not present in repository.")));
     }

@@ -15,7 +15,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ErrorResponse errorResponse(UnknownStateException e) {
-        log.debug("Returning {} answer with message: {}", INTERNAL_SERVER_ERROR, e.getMessage());
+        log.info("Returning {} answer with message: {}", INTERNAL_SERVER_ERROR, e.getMessage());
         return new ErrorResponse(e.getMessage(), INTERNAL_SERVER_ERROR.toString());
     }
 }

@@ -34,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = utils.checkAndConvertToBooking(userId, bookingDto);
         booking.setStatus(Status.WAITING);
 
-        log.debug("Sending to DAO request to create new booking information.");
+        log.info("Sending to DAO request to create new booking information.");
         return utils.convertToDto(bookingRepository.save(booking));
     }
 
@@ -53,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
         if (!isApproved) {
             booking.setStatus(Status.REJECTED);
         }
-        log.debug("Sending to DAO request to update booking {} information.", bookingId);
+        log.info("Sending to DAO request to update booking {} information.", bookingId);
         return utils.convertToDto(bookingRepository.save(booking));
     }
 
@@ -62,14 +62,14 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingInfo(long userId, long bookingId) {
         Booking booking = getBookingById(bookingId);
         utils.checkIsUserBookerOrOwner(userId, booking);
-        log.debug("Sending to DAO request to get booking {}.", bookingId);
+        log.info("Sending to DAO request to get booking {}.", bookingId);
         return utils.convertToDto(booking);
     }
 
     @Override
     @Transactional
     public List<BookingDto> getUsersBookings(long userId, String state) {
-        log.debug("Sending to DAO request to get user {} bookings.", userId);
+        log.info("Sending to DAO request to get user {} bookings.", userId);
         utils.checkIfUserPresent(userId);
         List<Booking> resultList;
         switch (state) {
@@ -108,7 +108,7 @@ public class BookingServiceImpl implements BookingService {
         if (size < 1) {
             throw new ValidationException("Size is too small.");
         }
-        log.debug("Sending to DAO request to get user {} bookings pagination.", userId);
+        log.info("Sending to DAO request to get user {} bookings pagination.", userId);
         utils.checkIfUserPresent(userId);
         Page<Booking> resultList;
         switch (state) {
@@ -141,7 +141,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public List<BookingDto> getUsersItemsBookings(long userId, String state) {
-        log.debug("Sending to DAO request to get user's {} items bookings.", userId);
+        log.info("Sending to DAO request to get user's {} items bookings.", userId);
         utils.checkIfUserPresent(userId);
         List<Booking> resultList;
         switch (state) {
@@ -180,7 +180,7 @@ public class BookingServiceImpl implements BookingService {
         if (size < 1) {
             throw new ValidationException("Size is too small.");
         }
-        log.debug("Sending to DAO request to get user's {} items bookings pagination.", userId);
+        log.info("Sending to DAO request to get user's {} items bookings pagination.", userId);
         utils.checkIfUserPresent(userId);
         Page<Booking> resultList;
         switch (state) {
@@ -213,14 +213,14 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public Booking getLastBookingForItem(long itemId) {
-        log.debug("Sending to DAO request to get last booking for item {}.", itemId);
+        log.info("Sending to DAO request to get last booking for item {}.", itemId);
         return bookingRepository.findFirstByItem_IdAndStartIsBeforeOrderByStartDesc(itemId, LocalDateTime.now()).orElse(null);
     }
 
     @Override
     @Transactional
     public Booking getNextBookingForItem(long itemId) {
-        log.debug("Sending to DAO request to get next booking for item {}.", itemId);
+        log.info("Sending to DAO request to get next booking for item {}.", itemId);
         return bookingRepository.findFirstByItem_IdAndStartIsAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), Status.APPROVED).orElse(null);
     }
 

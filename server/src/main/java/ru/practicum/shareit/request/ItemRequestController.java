@@ -20,14 +20,14 @@ public class ItemRequestController {
     @PostMapping
     public ItemRequestDto addNewRequest(@RequestHeader(httpHeaderUserId) long userId,
                                         @RequestBody ItemRequestDto itemRequestDto) {
-        log.debug("Received request to add new ItemRequest.");
+        log.info("Received request to add new ItemRequest.");
 
         return requestService.addNewRequest(userId, itemRequestDto);
     }
 
     @GetMapping
     public List<ItemRequestDto> getUsersRequests(@RequestHeader(httpHeaderUserId) long userId) {
-        log.debug("Received request to get user {} request list.", userId);
+        log.info("Received request to get user {} request list.", userId);
 
         return requestService.getUserRequests(userId);
     }
@@ -36,7 +36,7 @@ public class ItemRequestController {
     public List<ItemRequestDto> getOtherUsersExistingRequestsPagination(@RequestHeader(httpHeaderUserId) long userId,
              @RequestParam(value = "from", required = false) Integer from,
              @RequestParam(value = "size", required = false) Integer size) {
-        log.debug("Received request from user {} to get other users ItemsRequests.", userId);
+        log.info("Received request from user {} to get other users ItemsRequests.", userId);
 
         if (from != null && size != null) {
             return requestService.getOtherUsersRequestsPagination(userId, from, size);
@@ -48,7 +48,7 @@ public class ItemRequestController {
     @GetMapping("/{requestId}")
     public ItemRequestDto getRequest(@RequestHeader(httpHeaderUserId) long userId,
                                      @PathVariable(value = "requestId") long requestId) {
-        log.debug("Received request to get request {}.", requestId);
+        log.info("Received request to get request {}.", requestId);
 
         return requestService.getRequest(userId, requestId);
     }

@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
 
         User user = utils.convertToUser(userDto);
 
-        log.debug("Sending to DAO information to add new user.");
+        log.info("Sending to DAO information to add new user.");
 
         return utils.convertToDto(userRepository.save(user));
     }
@@ -43,14 +43,14 @@ public class UserServiceImpl implements UserService {
             utils.checkNameForUpdating(userDto);
             user.setName(userDto.getName());
         }
-        log.debug("Sending to DAO updated user {} information.", userId);
+        log.info("Sending to DAO updated user {} information.", userId);
         return utils.convertToDto(userRepository.save(user));
     }
 
     @Override
     @Transactional
     public List<UserDto> getAllUsers() {
-        log.debug("Sending to DAO request to get all users.");
+        log.info("Sending to DAO request to get all users.");
 
         return userRepository.findAll().stream()
                 .map(utils::convertToDto)
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto getUserDtoById(long userId) {
-        log.debug("Sending to DAO request to get user with id {}.", userId);
+        log.info("Sending to DAO request to get user with id {}.", userId);
 
         return utils.convertToDto(getUserById(userId));
 
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(long userId) {
         checkIsUserPresent(userId);
 
-        log.debug("Sending to DAO request to delete user with id {}.", userId);
+        log.info("Sending to DAO request to delete user with id {}.", userId);
 
         userRepository.deleteById(userId);
     }

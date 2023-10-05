@@ -1,6 +1,4 @@
-package src.main.java.ru.practicum.shareit.booking.dto;
-
-import java.util.Optional;
+package ru.practicum.shareit.booking.dto;
 
 public enum RequestState {
     ALL,
@@ -8,14 +6,5 @@ public enum RequestState {
     FUTURE,
     PAST,
     REJECTED,
-    WAITING;
-
-    public static Optional<RequestState> from(String stringState) {
-        for (RequestState state : values()) {
-            if (state.name().equalsIgnoreCase(stringState)) {
-                return Optional.of(state);
-            }
-        }
-        return Optional.empty();
-    }
+    WAITING
 }

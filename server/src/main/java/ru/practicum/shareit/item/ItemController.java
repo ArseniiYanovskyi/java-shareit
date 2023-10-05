@@ -20,7 +20,7 @@ public class ItemController {
     @PostMapping
     public ItemDto addItem(@RequestHeader(httpHeaderUserId) long userId,
                            @RequestBody ItemDto itemDto) {
-        log.debug("Received request to add new Item from user {}.", userId);
+        log.info("Received request to add new Item from user {}.", userId);
 
         return itemService.addItem(userId, itemDto);
     }
@@ -29,7 +29,7 @@ public class ItemController {
     public CommentDto addComment(@RequestHeader(httpHeaderUserId) long userId,
                                  @PathVariable(value = "itemId") long itemId,
                                  @RequestBody CommentDto commentDto) {
-        log.debug("Received request to add new comment from user {} to item {}.", userId, itemId);
+        log.info("Received request to add new comment from user {} to item {}.", userId, itemId);
         return itemService.addComment(userId, itemId, commentDto);
     }
 
@@ -37,7 +37,7 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader(httpHeaderUserId) long userId,
                               @RequestBody ItemDto itemDto,
                               @PathVariable(value = "itemId") long itemId) {
-        log.debug("Received request to update existed Item with id {} from user id {}.", itemId, userId);
+        log.info("Received request to update existed Item with id {} from user id {}.", itemId, userId);
         itemDto.setId(itemId);
         return itemService.updateItem(userId, itemDto);
     }
@@ -45,7 +45,7 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDto getById(@RequestHeader(httpHeaderUserId) long userId,
                            @PathVariable(value = "itemId") long itemId) {
-        log.debug("Received request to get existed Item with id {}.", itemId);
+        log.info("Received request to get existed Item with id {}.", itemId);
 
         return itemService.getItemDtoById(itemId, userId);
     }
@@ -54,7 +54,7 @@ public class ItemController {
     public List<ItemDto> getUserItems(@RequestHeader(httpHeaderUserId) long userId,
                                       @RequestParam(value = "from", required = false) Integer from,
                                       @RequestParam(value = "size", required = false) Integer size) {
-        log.debug("Received request to get items list by user id {}.", userId);
+        log.info("Received request to get items list by user id {}.", userId);
         if (from != null && size != null) {
             return itemService.getItemsByUserIdPagination(userId, from, size);
         }
@@ -65,7 +65,7 @@ public class ItemController {
     public List<ItemDto> searchForItems(@RequestParam String text,
                                         @RequestParam(value = "from", required = false) Integer from,
                                         @RequestParam(value = "size", required = false) Integer size) {
-        log.debug("Received request for search items by description with text: \"{}\"", text);
+        log.info("Received request for search items by description with text: \"{}\"", text);
         if (from != null && size != null) {
             return itemService.searchInDescriptionPagination(text, from, size);
         }
